@@ -1,9 +1,13 @@
-h1 {
-    color: red;
-}
-
 body{
     display: grid;
     justify-content: center;
     align-items: center;
+}
+
+h1 {
+    color: red;
+}
+
+h2 {
+    letter-spacing: 4px;
 }
