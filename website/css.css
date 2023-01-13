@@ -2,9 +2,6 @@ h1 {
     color: red;
 }
 
-<<<<<<< Updated upstream
-body{
-=======
 #navbar-menu{
     display: flex;
     justify-content: space-around;
@@ -12,7 +9,6 @@ body{
 }
 
 body {
->>>>>>> Stashed changes
     display: grid;
     justify-content: center;
     align-items: center;
