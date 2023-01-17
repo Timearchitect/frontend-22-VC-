@@ -1,8 +1,4 @@
 h1 {
-<<<<<<< HEAD
-  color: orange;
-}
-=======
     color: red;
 }
 
@@ -21,4 +17,3 @@ body {
     background-size: 400% 400%;
     animation: gradient 20s ease infinite;
 }
->>>>>>> bbf5b3974ce15e02cc091821e1b7c1ba33b93520
