@@ -1,4 +1,8 @@
 h1 {
+<<<<<<< HEAD
+  color: orange;
+}
+=======
     color: red;
 }
 
@@ -17,6 +21,9 @@ body {
     background-size: 400% 400%;
     animation: gradient 20s ease infinite;
 }
+<<<<<<< HEAD
+>>>>>>> bbf5b3974ce15e02cc091821e1b7c1ba33b93520
+=======
 #content{
     background-image: url("artboard 4-04.png");
     width: 1200px;  
@@ -25,3 +32,4 @@ body {
 
 }
 
+>>>>>>> 15784c2cc15e8c541e441f3987cbd285610a43b9
