@@ -12,3 +12,4 @@ function mapLightness(y){
   console.log(newLightness);
   return newLightness;
 }
+
