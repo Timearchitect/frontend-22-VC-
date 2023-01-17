@@ -18,3 +18,4 @@ function saveImageAs1() {
     <img src="https://gritacademy.se/wp-content/uploads/2021/05/Grit-Academy-logo.png" alt="W3Schools" width="104" height="142">
   </a>`;
 }
+
