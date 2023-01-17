@@ -17,3 +17,11 @@ body {
     background-size: 400% 400%;
     animation: gradient 20s ease infinite;
 }
+#content{
+    background-image: url("artboard 4-04.png");
+    width: 1200px;  
+    height: 500px;  
+    background-repeat: no-repeat;
+
+}
+
