@@ -1,6 +1,7 @@
 h1 {
-    color: red;
+  color: orange;
 }
+
 
 #navbar-menu{
     display: flex;
@@ -17,6 +18,8 @@ body {
     background-size: 400% 400%;
     animation: gradient 20s ease infinite;
 }
+
+
 #content{
     background-image: url("artboard 4-04.png");
     width: 1200px;  
@@ -24,4 +27,19 @@ body {
     background-repeat: no-repeat;
 
 }
+
+
+header{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    color: white;
+  }
+  
 
