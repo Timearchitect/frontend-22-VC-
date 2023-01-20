@@ -12,5 +12,6 @@ vanlig text p tagg *italic* **bold** ***italic&bold*** ~~genom stryken~~
 *-Alrik 2023*
 
 | titel | datum | id |
+| --- | --- | --- |
 | inception | 2010 | 5 |
 | shrek | 2001 | 1 |
