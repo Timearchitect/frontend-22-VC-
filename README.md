@@ -18,3 +18,41 @@ vanlig text p tagg *italic* **bold** ***italic&bold*** ~~genom stryken~~
 | shrek | 2001 | 1 |
 | shrek | 2001 | 1 |
 | shrek | 2001 | 1 |
+
+
+[link to repository](https://github.com/Timearchitect/frontend-22-VC-) 
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+```
+
+```css
+@media (prefers-color-scheme: dark) {
+  .day.dark-scheme {
+    background: #333;
+    color: white;
+  }
+  .night.dark-scheme {
+    background: black;
+    color: #ddd;
+  }
+}
+
+```
+
+```javascript
+let url= "https://api.openweathermap.org/data/2.5/weather?lat=11.265652&lon=15.321664&appid=w4ghg4fdfg3hgfdf4gsertyuik4v4"
+fetch(url)
+.then( (response) => {response.json()} )
+.then ( (data) => console.log(data) ) 
+.catch ( error => console.error(error))
+```
+
+
+
+
