@@ -42,4 +42,6 @@ fetch(url)
   .then((response) => response.json())
   .then((data) => console.log(data));
 ```
+<img src="images\elaichi mockup-01.jpg" alt="isolated" width="200"/>
 
+![image info](/images/elaichi%20mockup-01.jpg)
