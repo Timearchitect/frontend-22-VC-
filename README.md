@@ -15,3 +15,6 @@ vanlig text p tagg *italic* **bold** ***italic&bold*** ~~genom stryken~~
 | --- | --- | --- |
 | inception | 2010 | 5 |
 | shrek | 2001 | 1 |
+| shrek | 2001 | 1 |
+| shrek | 2001 | 1 |
+| shrek | 2001 | 1 |
