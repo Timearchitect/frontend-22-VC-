@@ -53,6 +53,9 @@ fetch(url)
 .catch ( error => console.error(error))
 ```
 
+<img width="200" src="images/logotyp-13.png"/>
+
+![alttext](/images/KDM%20mockup.png)
 
 
 
