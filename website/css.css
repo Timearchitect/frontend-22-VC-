@@ -7,10 +7,26 @@ h1 {
     color: blue;
 }
 
-h2{
+body {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    margin: 3rem;
+    background: linear-gradient(-80deg, #6e1bea87, #0754ad90, #d35ba7be, #7112948f);
+    background-size: 400% 400%;
+    animation: gradient 20s ease infinite;
+}
 
-    font-size: large;
-}
-#fetch-heineken{
-    font-family: Padyakke Expanded One;
-}
+
+@keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
