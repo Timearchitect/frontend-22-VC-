@@ -1,15 +1,17 @@
 :root{
-
+    --white: white;
     --grey:#666;
 }
-
+/*
+Pratbubblor ska fixa responsive design också
+*/
 p.bubble {
     display: inline-block;
 	position: relative;
 	text-align: center;
 	line-height: 1.2rem;
 	margin: 1rem auto;
-	background-color: #fff;
+	background-color: var(--white);
 	border: 8px solid var(--grey);
 	border-radius: 30px;
 	font-family: sans-serif;
@@ -22,7 +24,7 @@ p.thought {
 	border-radius: 200px;
 	padding: 30px;	
 }
-
+/*bitar av pratbubblan*/
 p.bubble:before,
 p.bubble:after {
 	content: ' ';
