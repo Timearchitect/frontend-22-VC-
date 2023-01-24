@@ -33,8 +33,6 @@ const database = getDatabase();
 
 
 
-
-
 // skriva
 function writeUserData(message) {
     let adressRef= ref(database, "Eleonora/barn1" );
@@ -96,6 +94,9 @@ onValue(
 
 
 
+
+
+
 //radera stuff.
 const deleteRef = ref(database, "/filip/username");
 remove(deleteRef).then(() => {
@@ -122,50 +123,4 @@ if (typeof(Storage) !== "undefined") {
 
 
 
-function randomizeGroup(){
-
-let namnlista= [
-"AbdullaAlmasri",
-"AliMohammad khan",
-"AliHamze",
-"AnnaSundberg",
-"AntonPetersson",
-"AntonSöfgren",
-"AustinHamilton",
-"BelulaBelai",
-"BernaMaloku",
-"Duc AnhTran",
-"EddiePeters",
-"Eleonora AnnaNocentini Sköldebrink",
-"EliasKhayyati",
-"FelixWong",
-"HampusPersson",
-"HuyenNguyen",
-"IgnacioCerda",
-"Kyung MiKang",
-"LeonTillberg Mlinaric",
-"LouiseKanizsai Ståhl",
-"MajaHristova",
-"MartinBungner",
-"MohammadJafari MJ",
-"MohammedAllafta",
-"NerminFayad",
-"NguyenMinh Trung",
-"OscarLundin",
-"OskarKubicka",
-"RobinBognar",
-"SarahAl-Dhuhaibawi",
-"SigneLindström",
-"simonandersson",
-"Sorayyaahmadi",
-"ViktorJohansson",
-"ZipengJiang",
-"danyealmateen",
-"josefinA"];
-
-namnlista.forEach(element => {
-    console.log(element, Math.floor(Math.random()*4 ) )
-});
-
-
-}
+console.log(123);
