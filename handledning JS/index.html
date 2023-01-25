@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="slide">
+                <div id="header"></div>
+                <div id="canvas"></div>
+            </div>
+            <div id="sidebar"></div>
+        </div>
+    </body>
+    <style>
+:root {
+    outline: 2px solid #000000;
+    padding: 2vw;
+}
+
+#wrapper {
+    background-color: blueviolet;
+    padding: 1vh;
+    display: flex;
+}
+
+#slide {
+    flex-grow: 4;
+    background-color: aqua;
+    height: 100vh;
+}
+
+#slide div{
+    background-color: green;
+    height:20vh;
+    margin:5vh;
+}
+
+
+#sidebar {
+    flex-grow: 1;
+    background-color: red;
+    height: 100vh;
+    /*  margin:5vh;
+*/
+}
+
+    </style>
+</html>
