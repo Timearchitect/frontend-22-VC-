@@ -85,3 +85,15 @@ if (typeof Storage !== "undefined") {
   //localStorage.setItem("name", "Alrik");
   // localStorage.setItem("lastLoggin","today!!");
 }
+
+
+const maxCharacters = 500;
+$('#message-input').on('keyup', function() {
+
+  let characters = $(this).val().length;
+
+  if (characters > maxCharacters) {
+   
+    $(this).val($(this).val().substring(0, maxCharacters));
+  }
+});
