@@ -1,0 +1,58 @@
+a{
+    cursor: pointer;
+    font-size: 5rem;
+    font-weight: bolder;
+}
+
+/* Zipeng Feature */
+@media only screen and (max-width: 600px) {
+    .list {
+      width: 80%;
+    }
+    .header {
+      font-size: 18px;
+    }
+    .items {
+      height: 300px;
+    }
+    .item {
+      padding: 8px 16px;
+    }
+    .footer_input {
+      font-size: 18px;
+    }
+  }
+  
+  @media only screen and (min-width: 600px) and (max-width: 800px) {
+    .list {
+      width: 90%;
+    }
+  }
+  
+  @media only screen and (min-width: 800px) {
+  }
+
+
+
+  body {
+    margin: 3rem;
+    background: linear-gradient(-80deg, #0800a6d1, #1c31d5a0, #0435d7b0, #2406ad);
+    background-size: 400% 400%;
+    animation: gradient 20s ease infinite;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
