@@ -93,3 +93,27 @@
     transform: scale(0.9);
   }
 }
+
+#newh4 {
+  font-size: 40px;
+}
+
+#newh4:hover {
+  background-color: orange;
+  border: 5px red dotted;
+  transform: ease-in 3s;
+  width: 30%;
+}
+
+.fade {
+  animation: fadeIn 5s;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
