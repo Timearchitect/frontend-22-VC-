@@ -17,9 +17,6 @@ import {
     onChildRemoved
 } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js"; // <---
 
-// TODO: Add SDKs for Firebase products that you want to use
-
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 
@@ -106,19 +103,15 @@ onValue(
   }
 );
 onChildAdded(ref(db, "/"), (data) => {
-  let d = data.val();
+  const d = data.val();
   document.getElementById(
     "content"
   ).insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
   document.getElementById(data.key).addEventListener('contextmenu', event => event.preventDefault());
-  /*document.getElementById(
-    "content"
-  ).innerHTML += `<p class="bubble speech" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`;*/
   console.log(d);
 });
 
 onChildRemoved(ref(db, "/"), (data) => {
-  //console.log(document.querySelector(`#${data.key}`).remove())
   console.log(document.getElementById(data.key).remove())
 });
 
