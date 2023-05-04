@@ -85,7 +85,7 @@ onValue(
     { onlyOnce: true }
 );
 
-onValue(
+/* onValue(
     ref(db, "/"),
     (snapshot) => {
         // root kolla alla namn i root
@@ -93,10 +93,13 @@ onValue(
             const childKey = childSnapshot.key;
             const childData = childSnapshot.val();
             // document.getElementById("content").innerHTML += "<p>"+childKey+"  "+childData.message+"</p>" + "<br>"
-           /* document.getElementById(
-                "content"
-            ).innerHTML += `<p class="bubble speech" id="${childKey}" style="left:${childData.x}vw; top:${childData.y}vh">${childData.message}</p>`;
-            */
+
+           console.log(childData.message.length);
+           if(childData.message.length< 5)
+           document.getElementById(
+            "content"
+          ).insertAdjacentHTML('beforeend', `<p class="bubble" id="${childKey}" style="left:${childData.x}vw; top:${childData.y}vh">${childData.message}</p>`);
+          else
             document.getElementById(
               "content"
             ).insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${childKey}" style="left:${childData.x}vw; top:${childData.y}vh">${childData.message}</p>`);
@@ -111,12 +114,21 @@ onValue(
     } , {
     onlyOnce: true
   }
-);
+); */
 onChildAdded(ref(db, "/"), (data) => {
   let d = data.val();
+
+  if(d.message.length< 5)
+    document.getElementById(
+      "content"
+    ).insertAdjacentHTML('beforeend', `<p class="bubble" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
+  else
   document.getElementById(
     "content"
   ).insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
+
+
+
   document.getElementById(data.key).addEventListener('contextmenu', event => event.preventDefault());
   /*document.getElementById(
     "content"
