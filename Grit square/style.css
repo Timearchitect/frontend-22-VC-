@@ -33,7 +33,12 @@ p.bubble {
   -moz-animation: fadein 1s; /* Firefox < 16 */
    -ms-animation: fadein 1s; /* Internet Explorer */
     -o-animation: fadein 1s; /* Opera < 12.1 */
-       animation: fadein 1s;
+      animation: fadein 1s;
+}
+
+.bubble:hover{
+  transform: scale(1.5);
+  transition: transform .5s ease;
 }
 
 @keyframes fadein {
