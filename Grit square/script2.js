@@ -41,8 +41,8 @@ document.getElementById("content").addEventListener("click", (event) => {
 
     var e = event;
     console.log(e);
-    var x = (event.clientX / window.innerWidth) * 100;
-    var y = (event.clientY / window.innerHeight) * 100;
+    var x = Math.round(event.clientX / window.innerWidth * 100);
+    var y = Math.round(event.clientY / window.innerHeight * 100);
 
     console.log(window.innerWidth, window.innerHeight);
     console.log(x, y);
