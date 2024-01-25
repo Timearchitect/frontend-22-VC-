@@ -81,6 +81,19 @@ onChildAdded(ref(db, "/"), (data) => {
     else document.getElementById("content").insertAdjacentHTML("beforeend", `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
 
     document.getElementById(data.key).addEventListener("contextmenu", (event) => event.preventDefault());
+    
+    let bubbleID = document.querySelector(`#${data.key}`)
+
+    document.getElementById(data.key).addEventListener("mouseup", (event) => {
+        if (event.button == 2) 
+        alert ("Delete message?");
+        bubbleID.remove();
+
+        remove(ref( db , bubbleID.id));
+    
+    })
+
+
     /*document.getElementById(
     "content"
   ).innerHTML += `<p class="bubble speech" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`;*/
@@ -88,7 +101,7 @@ onChildAdded(ref(db, "/"), (data) => {
 });
 
 onChildRemoved(ref(db, "/"), (data) => {
-    //console.log(document.querySelector(`#${data.key}`).remove())
+    console.log(document.querySelector(`#${data.key}`).remove())
     console.log(document.getElementById(data.key).remove());
 });
 
@@ -111,6 +124,11 @@ onValue(
   }*/
 );
 document.getElementById("btn").addEventListener("click", get);
+
+
+
+
+
 
 // Alriks databas
 const BASE_URL = "https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/.json";
