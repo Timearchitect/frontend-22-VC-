@@ -133,25 +133,26 @@ document.getElementById("btn").addEventListener("click", get);
 // Alriks databas
 const BASE_URL = "https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/.json";
 
-/* PUT */
+/* PUT , läggaer till skriver över */
 async function putMessage() {
-    
-    let messageObject = { text: "Hello world put", time: new Date() };
-
+    let messageObject = {
+        text: "Hello world put",
+        time: new Date(),
+    };
+    console.log(JSON.stringify(messageObject));
     const requestOptions = {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(messageObject),
     };
 
-    let response = await fetch(BASE_URL,requestOptions);
+    let response = await fetch(BASE_URL, requestOptions);
     let data = await response.json();
     console.log(data);
 }
 
-/* PATCH */
+/* PATCH , skriver/uppdaterar men skriver ej över */
 async function patchMessage() {
-    
     let messageObject = { text: "Hello world put", time: new Date() };
 
     const requestOptions = {
@@ -160,11 +161,11 @@ async function patchMessage() {
         body: JSON.stringify(messageObject),
     };
 
-    let response = await fetch(BASE_URL,requestOptions);
+    let response = await fetch(BASE_URL, requestOptions);
     let data = await response.json();
     console.log(data);
-}async function patchMessage2() {
-    
+}
+async function patchMessage2() {
     let messageObject = { firstName: "Alrik", lastName: "HE" };
 
     const requestOptions = {
@@ -173,7 +174,7 @@ async function patchMessage() {
         body: JSON.stringify(messageObject),
     };
 
-    let response = await fetch("https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/-NoCf2s5SInOIFR3X0VX/.json"   ,requestOptions);
+    let response = await fetch("https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/-NoCf2s5SInOIFR3X0VX/.json", requestOptions);
     let data = await response.json();
     console.log(data);
 }
@@ -188,7 +189,7 @@ async function postMessage() {
         body: JSON.stringify(messageObject),
     };
 
-    let response = await fetch(BASE_URL,requestOptions);
+    let response = await fetch(BASE_URL, requestOptions);
     let data = await response.json();
     console.log(data);
 }
@@ -205,7 +206,7 @@ async function deleteMessage() {
     const requestOptions = {
         method: "DELETE",
     };
-    let response = await fetch(BASE_URL,requestOptions);
+    let response = await fetch(BASE_URL, requestOptions);
     let data = await response.json();
     console.log(data);
 }
