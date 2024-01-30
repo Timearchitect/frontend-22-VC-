@@ -204,13 +204,14 @@ const messages = [
 ];
 
 // Function to display a random message
-function randomMessage() {
+function get() {
   // Get a random index from the messages array
   const randomIndex = Math.floor(Math.random() * messages.length);
 
   // Return the random message
   return messages[randomIndex];
 }
+
 
 const randomMessageElement = document.createElement('p');
 randomMessageElement.classList.add('bubble speech');
