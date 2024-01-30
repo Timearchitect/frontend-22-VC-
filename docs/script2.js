@@ -194,3 +194,27 @@ async function deleteMessage() {
   let data = await response.json();
   console.log(data);
 }
+// Define the predefined messages array
+const messages = [
+  'Message 1',
+  'Message 2',
+  'Message 3',
+  'Message 4',
+  'Message of the day',
+];
+
+// Function to display a random message
+function randomMessage() {
+  // Get a random index from the messages array
+  const randomIndex = Math.floor(Math.random() * messages.length);
+
+  // Return the random message
+  return messages[randomIndex];
+}
+
+const randomMessageElement = document.createElement('p');
+randomMessageElement.classList.add('bubble speech');
+randomMessageElement.innerHTML = randomMessage();
+document.getElementById('content').appendChild(randomMessageElement);
+
+
