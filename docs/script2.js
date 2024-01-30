@@ -194,28 +194,17 @@ async function deleteMessage() {
   let data = await response.json();
   console.log(data);
 }
-// Define the predefined messages array
-const messages = [
-  'Message 1',
-  'Message 2',
-  'Message 3',
-  'Message 4',
-  'Message of the day',
-];
-
-// Function to display a random message
+// style uppercase och italic
+document.getElementById('btn').addEventListener('click', get);
 function get() {
-  // Get a random index from the messages array
-  const randomIndex = Math.floor(Math.random() * messages.length);
-
-  // Return the random message
-  return messages[randomIndex];
+  var promptMessage = document.getElementById('messageInput').value;
+  if (!promptMessage) return;
+  // Get the selected styles from checkboxes
+  const uppercase = document.getElementById('uppercaseCheckbox').checked;
+  const italic = document.getElementById('italicCheckbox').checked;
+  promptMessage = uppercase ? promptMessage.toUpperCase() : promptMessage;
+  promptMessage = italic ? `<em>${promptMessage}</em>` : promptMessage;
+  document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble">${promptMessage}</p>`);
 }
-
-
-const randomMessageElement = document.createElement('p');
-randomMessageElement.classList.add('bubble speech');
-randomMessageElement.innerHTML = randomMessage();
-document.getElementById('content').appendChild(randomMessageElement);
 
 
