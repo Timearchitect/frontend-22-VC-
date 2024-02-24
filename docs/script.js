@@ -24,8 +24,40 @@ const db = getDatabase(app); // <-----
 
 console.log(db);
 
+const nameField = document.getElementById('nameField');
+//sparar author
+let nameInput = '';
+document.getElementById('btn').addEventListener('click', ()=>{
+  nameInput = nameField.value;
+  if(nameInput.length > 0){
+  btn.innerText = 'Your name:';
+  btn.disabled = true;
+}
+});
+
+//tömmer fältet när man vill ändra author
+nameField.addEventListener('click', ()=>{
+  nameField.value = '';
+  btn.innerText = 'submit name';
+  btn.disabled = false;
+});
+
+//så man kan klicka enter istället för trycka på knappen
+function clickBtn() {
+  btn.click();
+  nameField.blur();
+}
+
+nameField.addEventListener('keyup', (event) => {
+  if (event.key === 'Enter') {
+    clickBtn();
+  }
+});
+
 //document.getElementById("btn").addEventListener(
 document.getElementById('content').addEventListener('click', (event) => {
+
+  if(btn.disabled === true){
   var promptMessage = prompt('Write you message:', 'message');
   if (promptMessage == null) return;
 
@@ -45,13 +77,28 @@ document.getElementById('content').addEventListener('click', (event) => {
         x: x,
         y: y,
     });*/
+
   push(ref(db, '/'), {
     username: 'Alrik',
     dateOfCretion: new Date().toString('yyyy-MM-dd hh:mm:ss'),
     message: promptMessage,
+    author: nameInput,
     x: x,
     y: y,
   });
+}else{
+  alert('Warning! Your post have no author. Please submit a name in the field and confirm.');
+  nameField.style.backgroundColor = 'red';
+  setTimeout(()=>{
+    nameField.style.backgroundColor = null;
+  },500);
+  setTimeout(()=>{
+    btn.style.backgroundColor = 'red';
+  },1000);
+  setTimeout(()=>{
+    btn.style.backgroundColor = null;
+  },1500);
+}
 });
 
 function writeUserData() {
@@ -77,8 +124,12 @@ function writeUserData() {
 onChildAdded(ref(db, '/'), (data) => {
   let d = data.val();
 
-  if (d.message.length < 5) document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
-  else document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
+if (d.message.length < 5) {
+  document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}<span class=author>${d.author}<span></p>`);
+} else {
+  document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}<span class=author>${d.author}<span></p>`);
+}
+
 
   document.getElementById(data.key).addEventListener('contextmenu', (event) => event.preventDefault());
 
@@ -112,7 +163,7 @@ remove(ref(db , 'henrik') ).then(() => {
 
 //update( ref( db, alrik), () =>{ message: "New trainer" } );
 
-document.getElementById('btn').addEventListener('click', get);
+//document.getElementById('btn').addEventListener('click', get);
 
 // Alriks databas
 const BASE_URL = 'https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/.json';
