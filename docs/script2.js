@@ -48,9 +48,13 @@ document.getElementById('content').addEventListener('click', (event) => {
   push(ref(db, '/'), {
     username: 'Alrik',
     dateOfCretion: new Date().toString('yyyy-MM-dd hh:mm:ss'),
-    message: promptMessage,
+    message: document.getElementById('uppercaseCheckbox').checked ? promptMessage.toUpperCase() : promptMessage,
     x: x,
     y: y,
+    attributes: {
+      italic: document.getElementById('italicCheckbox').checked,
+      uppercase: document.getElementById('uppercaseCheckbox').checked,
+    },
   });
 });
 
@@ -76,9 +80,13 @@ function writeUserData() {
 
 onChildAdded(ref(db, '/'), (data) => {
   let d = data.val();
+  const italicClass = d.italic ? ' italic' : ''; 
 
-  if (d.message.length < 5) document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
-  else document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble speech" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
+  if (d.message.length < 5) {
+  document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);}
+  else {
+    document.getElementById('content').insertAdjacentHTML('beforeend', `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`);
+  }
 
   document.getElementById(data.key).addEventListener('contextmenu', (event) => event.preventDefault());
 
