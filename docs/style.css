@@ -114,5 +114,7 @@ p.thought:after {
   margin: 4px;
   color: black;
 }
-
+.italic {
+  font-style: italic;
+}
 
