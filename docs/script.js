@@ -171,6 +171,12 @@ remove(ref(db , 'henrik') ).then(() => {
 
 //document.getElementById('btn').addEventListener('click', get);
 
+/*
+*  
+*   REST API GUIDE FÖR FIREBASE NEDAN |
+*                                     V 
+*/
+
 // Alriks databas
 const BASE_URL = 'https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/.json';
 
