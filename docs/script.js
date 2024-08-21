@@ -65,10 +65,12 @@ nameField.addEventListener("keyup", (event) => {
 });
 
 //document.getElementById("btn").addEventListener(
+  
 document.getElementById("content").addEventListener("click", (event) => {
   if (btn.disabled === true) {
     var promptMessage = prompt("Write you message:", "message");
     if (promptMessage == null) return;
+    const chosenColor = document.getElementById("post-it-color").value;
 
     var e = event;
     console.log(e);
@@ -77,15 +79,6 @@ document.getElementById("content").addEventListener("click", (event) => {
 
     console.log(window.innerWidth, window.innerHeight);
     console.log(x, y);
-    //let inputName = document.getElementById("inName").value;
-    //console.log(inputName);
-    /*
-    set(ref(db, inputName), {
-        dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
-        message: promptMessage,
-        x: x,
-        y: y,
-    });*/
 
     push(ref(db, "/"), {
       username: "Alrik",
@@ -94,6 +87,7 @@ document.getElementById("content").addEventListener("click", (event) => {
         ? promptMessage.toUpperCase()
         : promptMessage,
       author: nameInput,
+      color: chosenColor,
       x: x,
       y: y,
       attributes: {
@@ -147,14 +141,14 @@ onChildAdded(ref(db, "/"), (data) => {
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`
+        `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
       );
   } else {
     document
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`
+        `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
       );
   }
 
