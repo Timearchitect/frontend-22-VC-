@@ -2,13 +2,12 @@
   --white: white;
   --grey: #666;
 }
-body{
-margin:0;
-padding:0;
-overflow: hidden;
-
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
-#content{
+#content {
   width: 100vw;
   height: 100vh;
 }
@@ -29,25 +28,30 @@ p.bubble {
   padding: 20px;
   font-size: large;
   transform: scale(1);
-  transition: transform .5s ease;
+  transition: transform 0.5s ease;
   transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
   -moz-animation: fadein 1s; /* Firefox < 16 */
-   -ms-animation: fadein 1s; /* Internet Explorer */
-    -o-animation: fadein 1s; /* Opera < 12.1 */
-      animation: fadein 1s;
+  -ms-animation: fadein 1s; /* Internet Explorer */
+  -o-animation: fadein 1s; /* Opera < 12.1 */
+  animation: fadein 1s;
 }
 
-.bubble:hover{
+.bubble:hover {
   transform: scale(1.5);
-  transition: transform .2s ease;
+  transition: transform 0.2s ease;
 }
 
 @keyframes fadein {
-  from { opacity: 0; translate: 0px 2rem; }
-  to   { opacity: 1; translate: 0px 0px; }
+  from {
+    opacity: 0;
+    translate: 0px 2rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0px 0px;
+  }
 }
-
 
 p.thought {
   width: 300px;
@@ -117,4 +121,11 @@ p.thought:after {
 .italic {
   font-style: italic;
 }
+/* Styles when in fullscreen */
+.fullscreen > * {
+  display: none;
+}
 
+.fullscreen > #content {
+  display: block;
+}
