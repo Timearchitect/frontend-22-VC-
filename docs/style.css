@@ -40,6 +40,7 @@ p.bubble {
 .bubble:hover {
   transform: scale(1.5);
   transition: transform 0.2s ease;
+  z-index: 10;
 }
 
 @keyframes fadein {
@@ -116,7 +117,7 @@ p.thought:after {
 .author::after {
   content: "says";
   margin: 4px;
-  color: black;
+  color: #000000;
 }
 .italic {
   font-style: italic;
