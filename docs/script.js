@@ -293,5 +293,9 @@ function checkFullscreen() {
     document.body.className = "";
   }
 }
+
 // Check fullscreen status every 10 seconds
-setInterval(checkFullscreen, 10000);
+// setInterval(checkFullscreen, 10000);
+
+
+window.addEventListener('resize', checkFullscreen, true);
