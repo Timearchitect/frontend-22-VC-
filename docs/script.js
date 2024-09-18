@@ -136,19 +136,21 @@ onChildAdded(ref(db, "/"), (data) => {
   let d = data.val();
   const italicClass = d.attributes && d.attributes.italic ? " italic" : "";
 
+const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+
   if (d.message.length < 5) {
     document
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
+        `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${messageHTML}</p>`
       );
   } else {
     document
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
+        `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${messageHTML}</p>`
       );
   }
 
@@ -299,3 +301,5 @@ function checkFullscreen() {
 
 
 window.addEventListener('resize', checkFullscreen, true);
+
+
