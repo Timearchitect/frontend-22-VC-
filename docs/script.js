@@ -4,6 +4,7 @@ import {
   ref,
   set,
   onValue,
+  runTransaction,
   remove,
   push,
   onChildAdded,
@@ -64,9 +65,48 @@ nameField.addEventListener("keyup", (event) => {
   }
 });
 
+// Function to increment the like counter
+function likeMessage(messageId) {
+  const likesRef = ref(db, `/${messageId}/likes`);
+  
+  // Use transaction to safely increment likes
+  runTransaction(likesRef, (currentLikes) => {
+    return (currentLikes || 0) + 1; // Increment likes by 1
+  }).catch((error) => {
+    console.log("Error updating likes:", error);
+  });
+}
+
+// Function to increment the dislike counter
+function dislikeMessage(messageId) {
+  const dislikesRef = ref(db, `/${messageId}/dislikes`);
+  
+  // Use transaction to safely increment dislikes
+  runTransaction(dislikesRef, (currentDislikes) => {
+    return (currentDislikes || 0) + 1; // Increment dislikes by 1
+  }).catch((error) => {
+    console.log("Error updating dislikes:", error);
+  });
+}
+
+
+
 //document.getElementById("btn").addEventListener(
   
 document.getElementById("content").addEventListener("click", (event) => {
+  // Check if the click was on a Like or Dislike button, and handle it separately
+  if (event.target && event.target.matches("button[id^='like-btn-']")) {
+    const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
+    likeMessage(messageId);
+    return; 
+  }
+
+  if (event.target && event.target.matches("button[id^='dislike-btn-']")) {
+    const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
+    dislikeMessage(messageId);
+    return; 
+  }
+
   if (btn.disabled === true) {
     var promptMessage = prompt("Write you message:", "message");
     if (promptMessage == null) return;
@@ -88,6 +128,8 @@ document.getElementById("content").addEventListener("click", (event) => {
         : promptMessage,
       author: nameInput,
       color: chosenColor,
+      likes: 0, 
+      dislikes: 0, 
       x: x,
       y: y,
       attributes: {
@@ -132,25 +174,66 @@ function writeUserData() {
   { onlyOnce: true }
 ); */
 
+
+
 onChildAdded(ref(db, "/"), (data) => {
   let d = data.val();
   const italicClass = d.attributes && d.attributes.italic ? " italic" : "";
+  const messageId = data.key;
+const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
 
-  if (d.message.length < 5) {
-    document
-      .getElementById("content")
-      .insertAdjacentHTML(
-        "beforeend",
-        `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
-      );
-  } else {
-    document
-      .getElementById("content")
-      .insertAdjacentHTML(
-        "beforeend",
-        `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">${d.message}</p>`
-      );
-  }
+if (d.message.length < 5) {
+  document
+    .getElementById("content")
+    .insertAdjacentHTML(
+      "beforeend",
+      `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
+        ${messageHTML}
+        <br/>
+          <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
+           <span id="like-count-${messageId}">${d.likes || 0}</span>
+           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
+           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+      </p>`
+    );
+} else {
+  document
+    .getElementById("content")
+    .insertAdjacentHTML(
+      "beforeend",
+      `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
+        ${messageHTML}
+        <br/>
+        
+        <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
+        <span><span id="like-count-${data.key}">${d.likes || 0}</span></span> 
+        
+        <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
+        <span><span id="dislike-count-${data.key}">${d.dislikes || 0}</span></span> 
+      </p>`
+    );
+}
+
+
+  // Add event listener for the "Like" button
+  document.getElementById(`like-btn-${messageId}`).addEventListener("click", (event) => {
+    event.stopPropagation(); 
+    likeMessage(messageId);
+  });
+// Add event listener for the "Dislike" button
+document.getElementById(`dislike-btn-${messageId}`).addEventListener("click", (event) => {
+  event.stopPropagation(); 
+  dislikeMessage(messageId);
+});
+
+  // Update like and dislike counters when changed in Firebase
+  onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
+    document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
+  });
+
+  onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
+    document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
+  });
 
   document
     .getElementById(data.key)
@@ -299,3 +382,5 @@ function checkFullscreen() {
 
 
 window.addEventListener('resize', checkFullscreen, true);
+
+

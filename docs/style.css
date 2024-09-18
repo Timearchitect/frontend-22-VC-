@@ -131,3 +131,19 @@ p.thought:after {
 .fullscreen > #content {
   display: block;
 }
+
+.emoji-btn {
+  border: none;
+  background-color: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.emoji-btn:hover {
+  transform: scale(1.2);
+}
+
+.bubble {
+  margin-bottom: 10px;
+}
+
