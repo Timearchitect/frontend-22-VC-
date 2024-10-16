@@ -65,6 +65,10 @@ nameField.addEventListener("keyup", (event) => {
   }
 });
 
+document.getElementById('delete-all-btn').addEventListener('click', () => {
+  remove(ref(db, "/"));
+});
+
 // Function to increment the like counter
 function likeMessage(messageId) {
   const likesRef = ref(db, `/${messageId}/likes`);
