@@ -66,6 +66,8 @@ nameField.addEventListener("keyup", (event) => {
 });
 
 document.getElementById('delete-all-btn').addEventListener('click', () => {
+
+  if(!confirm("are you sure? ")) return // David Rhodin
   remove(ref(db, "/"));
 });
 
