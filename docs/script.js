@@ -82,19 +82,6 @@ function likeMessage(messageId) {
     console.log("Error updating likes:", error);
   });
 }
-document.getElementById(messageId)?.classList.add("pulse-effect");
-setTimeout(() => {
-  document.getElementById(messageId)?.classList.remove("pulse-effect");
-}, 500);
-
-//  Lägger till animation på bubblan
-const bubble = document.getElementById(messageId);
-if (bubble) {
-  bubble.classList.add("pulse-effect");
-  setTimeout(() => {
-    bubble.classList.remove("pulse-effect");
-  }, 500);
-}
 
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
