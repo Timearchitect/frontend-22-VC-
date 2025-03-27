@@ -82,6 +82,10 @@ function likeMessage(messageId) {
     console.log("Error updating likes:", error);
   });
 }
+document.getElementById(messageId)?.classList.add("pulse-effect");
+setTimeout(() => {
+  document.getElementById(messageId)?.classList.remove("pulse-effect");
+}, 500);
 
 //  Lägger till animation på bubblan
 const bubble = document.getElementById(messageId);
