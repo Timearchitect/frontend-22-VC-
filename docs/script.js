@@ -82,6 +82,10 @@ function likeMessage(messageId) {
     console.log("Error updating likes:", error);
   });
 }
+document.getElementById(messageId)?.classList.add("pulse-effect");
+setTimeout(() => {
+  document.getElementById(messageId)?.classList.remove("pulse-effect");
+}, 500);
 
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
