@@ -2,19 +2,20 @@
   --white: white;
   --grey: #666;
 }
+
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   background-color: lightpink;
 }
+
 #content {
   width: 100vw;
   height: 100vh;
 }
-/*
-Pratbubblor ska fixa responsive design också
-*/
+
+/* Pratbubblor ska fixa responsive design också */
 p.bubble {
   user-select: none;
   display: inline-block;
@@ -31,10 +32,10 @@ p.bubble {
   transform: scale(1);
   transition: transform 0.5s ease;
   transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 1s; /* Firefox < 16 */
-  -ms-animation: fadein 1s; /* Internet Explorer */
-  -o-animation: fadein 1s; /* Opera < 12.1 */
+  -webkit-animation: fadein 1s;
+  -moz-animation: fadein 1s;
+  -ms-animation: fadein 1s;
+  -o-animation: fadein 1s;
   animation: fadein 1s;
 }
 
@@ -55,12 +56,33 @@ p.bubble {
   }
 }
 
+/* 🔥 Animation för like-effekt */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 255, 0, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 255, 0, 0.4);
+  }
+}
+
+.pulse-effect {
+  animation: pulse 0.5s ease;
+}
+
 p.thought {
   width: 300px;
   border-radius: 200px;
   padding: 30px;
 }
-/*bitar av pratbubblan*/
+
+/* bitar av pratbubblan */
 p.bubble:before,
 p.bubble:after {
   content: " ";
@@ -120,9 +142,11 @@ p.thought:after {
   margin: 4px;
   color: #000000;
 }
+
 .italic {
   font-style: italic;
 }
+
 /* Styles when in fullscreen */
 .fullscreen > * {
   display: none;
@@ -146,4 +170,3 @@ p.thought:after {
 .bubble {
   margin-bottom: 10px;
 }
-

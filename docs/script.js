@@ -83,6 +83,15 @@ function likeMessage(messageId) {
   });
 }
 
+//  Lägger till animation på bubblan
+const bubble = document.getElementById(messageId);
+if (bubble) {
+  bubble.classList.add("pulse-effect");
+  setTimeout(() => {
+    bubble.classList.remove("pulse-effect");
+  }, 500); 
+}
+
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
   const dislikesRef = ref(db, `/${messageId}/dislikes`);
