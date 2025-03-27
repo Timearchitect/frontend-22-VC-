@@ -1,6 +1,7 @@
 :root {
-  --white: white;
-  --grey: #666;
+  --white: #ffffff;
+  --grey: #666666;
+  --bubble-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 body {
@@ -8,6 +9,7 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: lightpink;
+  font-family: "Segoe UI", sans-serif;
 }
 
 #content {
@@ -15,48 +17,73 @@ body {
   height: 100vh;
 }
 
-/* Pratbubblor ska fixa responsive design också */
 p.bubble {
   user-select: none;
   display: inline-block;
   position: absolute;
-  text-align: center;
-  line-height: 1.2rem;
+  text-align: left;
+  line-height: 1.4;
   margin: 1rem auto;
   background-color: var(--white);
-  border: 8px solid var(--grey);
-  border-radius: 30px;
-  font-family: sans-serif;
-  padding: 20px;
-  font-size: large;
+  border: none;
+  border-radius: 22px;
+  font-family: "Segoe UI", sans-serif;
+  padding: 16px 20px;
+  font-size: 1rem;
   transform: scale(1);
-  transition: transform 0.5s ease;
-  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  -webkit-animation: fadein 1s;
-  -moz-animation: fadein 1s;
-  -ms-animation: fadein 1s;
-  -o-animation: fadein 1s;
-  animation: fadein 1s;
+  transition: transform 0.5s ease, box-shadow 0.3s ease;
+  animation: fadein 0.8s ease;
+  box-shadow: var(--bubble-shadow);
+  color: var(--grey);
+  max-width: 280px;
 }
 
 .bubble:hover {
-  transform: scale(1.5);
-  transition: transform 0.2s ease;
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   z-index: 10;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 30px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: var(--bubble-color, var(--white));
 }
 
 @keyframes fadein {
   from {
     opacity: 0;
-    translate: 0px 2rem;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    translate: 0px 0px;
+    transform: translateY(0);
   }
 }
 
-/* Animation för like-effekt bubbles */
+@keyframes bubblePop {
+  0% {
+    transform: scale(0.5) translateY(20px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) translateY(-5px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-in {
+  animation: bubblePop 0.6s ease-out;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -82,7 +109,6 @@ p.thought {
   padding: 30px;
 }
 
-/* bitar av pratbubblan */
 p.bubble:before,
 p.bubble:after {
   content: " ";
@@ -113,8 +139,6 @@ p.thought:after {
   height: 40px;
   background-color: #fff;
   border: 8px solid var(--grey);
-  -webkit-border-radius: 28px;
-  -moz-border-radius: 28px;
   border-radius: 28px;
 }
 
@@ -123,8 +147,6 @@ p.thought:after {
   height: 20px;
   left: 5px;
   bottom: -40px;
-  -webkit-border-radius: 18px;
-  -moz-border-radius: 18px;
   border-radius: 18px;
 }
 
@@ -146,11 +168,11 @@ p.thought:after {
 .italic {
   font-style: italic;
 }
+
 .bold {
   font-weight: bold;
 }
 
-/* Styles when in fullscreen */
 .fullscreen > * {
   display: none;
 }
@@ -170,6 +192,79 @@ p.thought:after {
   transform: scale(1.2);
 }
 
-.bubble {
-  margin-bottom: 10px;
+.bubble-wrapper {
+  position: absolute;
+  pointer-events: none;
+}
+
+.bubble-effect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(173,216,230,0.7), rgba(0,191,255,0.3));
+  border-radius: 50%;
+  animation: expandBubble 0.6s ease-out forwards, splashPop 0.6s ease-out forwards;
+  opacity: 0.8;
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 10px;
+  color: black;
+}
+
+@keyframes expandBubble {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(2.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes splashPop {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.hidden-message {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.reveal-message {
+  opacity: 1;
+}
+
+.splash-explosion {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  background: radial-gradient(circle, #00bfff 20%, transparent 70%);
+  border-radius: 50%;
+  animation: splashParticles 0.6s ease-out forwards;
+  opacity: 0.7;
+  z-index: 9;
+}
+
+@keyframes splashParticles {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
 }

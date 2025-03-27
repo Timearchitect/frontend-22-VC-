@@ -187,9 +187,6 @@ function writeUserData() {
   },
   { onlyOnce: true }
 ); */
-
-
-
 onChildAdded(ref(db, "/"), (data) => {
   let d = data.val();
   const italicClass = d.attributes?.italic ? " italic" : "";
@@ -197,85 +194,82 @@ onChildAdded(ref(db, "/"), (data) => {
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
   const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
-  const textColor = getTextColor(d.color);
+  const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
+  // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
+  document.getElementById("content").insertAdjacentHTML(
+    "beforeend",
+    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${d.y}vh;">
+      <div class="bubble-effect" id="effect-${data.key}">
+        <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
+      </div>
+    </div>`
+  );
 
-  if (d.message.length < 5) {
-    document
-      .getElementById("content")
-      .insertAdjacentHTML(
-        "beforeend",
-        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; background-color:${d.color}; color:${textColor}">
-        ${messageHTML}
-        <br/>
+  // 💥 Steg 2: Efter 600ms – ersätt med riktig bubbla och aktivera all funktionalitet
+  setTimeout(() => {
+    const wrapper = document.getElementById(`wrap-${data.key}`);
+    const msgContent = document.getElementById(`msg-${data.key}`)?.innerHTML;
+
+    if (wrapper && msgContent) {
+      wrapper.innerHTML = `
+        <div class="splash-explosion"></div>
+        <p class="bubble${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
+          ${msgContent}
+          <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
-           <span id="like-count-${messageId}">${d.likes || 0}</span>
-           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
-           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
-      </p>`
-      );
-  } else {
-    document
-      .getElementById("content")
-      .insertAdjacentHTML(
-        "beforeend",
-        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; background-color:${d.color}; color:${textColor}">
-        ${messageHTML}
-        <br/>
-        
-        <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
-        <span><span id="like-count-${data.key}">${d.likes || 0}</span></span> 
-        
-        <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
-        <span><span id="dislike-count-${data.key}">${d.dislikes || 0}</span></span> 
-      </p>`
-      );
-  }
+          <span id="like-count-${messageId}">${d.likes || 0}</span>
+          <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
+          <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+        </p>
+      `;
 
+      // 💨 Ta bort splash-effekten efter animation
+      setTimeout(() => {
+        wrapper.querySelector(".splash-explosion")?.remove();
+      }, 600);
 
-  // Add event listener for the "Like" button
-  document.getElementById(`like-btn-${messageId}`).addEventListener("click", (event) => {
-    event.stopPropagation();
-    likeMessage(messageId);
-  });
-  // Add event listener for the "Dislike" button
-  document.getElementById(`dislike-btn-${messageId}`).addEventListener("click", (event) => {
-    event.stopPropagation();
-    dislikeMessage(messageId);
-  });
+      // 👍 Like-knapp
+      document.getElementById(`like-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        likeMessage(messageId);
+      });
 
-  // Update like and dislike counters when changed in Firebase
-  onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
-    document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
-  });
+      // 👎 Dislike-knapp
+      document.getElementById(`dislike-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        dislikeMessage(messageId);
+      });
 
-  onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
-    document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
-  });
+      // 🔄 Live-uppdatering
+      onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
+        document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
+      });
 
-  document
-    .getElementById(data.key)
-    .addEventListener("contextmenu", (event) => event.preventDefault());
+      onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
+        document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
+      });
 
-  let bubbleID = document.querySelector(`#${data.key}`);
+      // 🚫 Inaktivera högerklick
+      const bubble = document.getElementById(data.key);
+      bubble.addEventListener("contextmenu", (event) => event.preventDefault());
 
-  document.getElementById(data.key).addEventListener("mouseup", (event) => {
-    if (event.button == 2) {
-      alert("Delete message?");
-      bubbleID.remove();
-      remove(ref(db, bubbleID.id));
+      // 🧼 Radera meddelande vid högerklick
+      bubble.addEventListener("mouseup", (event) => {
+        if (event.button === 2) {
+          alert("Delete message?");
+          bubble.remove();
+          remove(ref(db, bubble.id));
+        }
+      });
     }
-  });
-
-  /*document.getElementById(
-    "content"
-  ).innerHTML += `<p class="bubble speech" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`;*/
-  console.log(d);
+  }, 600);
 });
 
+// 🧹 Radera bubblan från DOM om den tas bort från Firebase
 onChildRemoved(ref(db, "/"), (data) => {
-  console.log(document.querySelector(`#${data.key}`).remove());
-  console.log(document.getElementById(data.key).remove());
+  document.querySelector(`#${data.key}`)?.remove();
+  document.getElementById(data.key)?.remove();
 });
 
 /*
