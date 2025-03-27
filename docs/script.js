@@ -95,9 +95,16 @@ function dislikeMessage(messageId) {
   });
 }
 
+// Function to determine if text should be black or white based on background color
+function getTextColor(bgColor) {
+  const r = parseInt(bgColor.substr(1, 2), 16);
+  const g = parseInt(bgColor.substr(3, 2), 16);
+  const b = parseInt(bgColor.substr(5, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 150 ? 'black' : 'white';
+}
 
 
-//document.getElementById("btn").addEventListener(
 
 document.getElementById("content").addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
@@ -190,13 +197,15 @@ onChildAdded(ref(db, "/"), (data) => {
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
   const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+  const textColor = getTextColor(d.color);
+
 
   if (d.message.length < 5) {
     document
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
+        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; background-color:${d.color}; color:${textColor}">
         ${messageHTML}
         <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
@@ -210,7 +219,7 @@ onChildAdded(ref(db, "/"), (data) => {
       .getElementById("content")
       .insertAdjacentHTML(
         "beforeend",
-        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
+        `<p class="bubble${combinedClasses}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; background-color:${d.color}; color:${textColor}">
         ${messageHTML}
         <br/>
         
