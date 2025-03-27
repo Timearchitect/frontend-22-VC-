@@ -127,8 +127,11 @@ document.getElementById("content").addEventListener("click", (event) => {
 
     var e = event;
     console.log(e);
-    var x = Math.round((event.clientX / window.innerWidth) * 100);
-    var y = Math.round((event.clientY / window.innerHeight) * 100);
+    var offsetX = -3; // i % av viewport-bredd
+    var offsetY = -5; // i % av viewport-höjd
+
+    var x = Math.round((event.clientX / window.innerWidth) * 100 + offsetX);
+    var y = Math.round((event.clientY / window.innerHeight) * 100 + offsetY);
 
     console.log(window.innerWidth, window.innerHeight);
     console.log(x, y);

@@ -17,43 +17,40 @@ body {
   height: 100vh;
 }
 
-p.bubble {
-  user-select: none;
-  display: inline-block;
+.bubble {
   position: absolute;
-  text-align: left;
-  line-height: 1.4;
-  margin: 1rem auto;
-  background-color: var(--white);
-  border: none;
-  border-radius: 22px;
-  font-family: "Segoe UI", sans-serif;
-  padding: 16px 20px;
-  font-size: 1rem;
-  transform: scale(1);
-  transition: transform 0.5s ease, box-shadow 0.3s ease;
-  animation: fadein 0.8s ease;
-  box-shadow: var(--bubble-shadow);
-  color: var(--grey);
   max-width: 280px;
+  padding: 14px 20px;
+  background-color: var(--white);
+  color: var(--grey);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.5rem; /* mjuk, ej helt rund */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  z-index: 1;
 }
 
 .bubble:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transform: scale(1.57);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
 
+
 .bubble::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 30px;
-  width: 0;
-  height: 0;
-  border: 10px solid transparent;
-  border-top-color: var(--bubble-color, var(--white));
-}
+    content: "";
+    position: absolute;
+    bottom: -9px;
+    left: 20px;
+    width: 0;
+    height: 0;
+    border: 12px solid transparent;
+    border-top-color: var(--bubble-color, var(--white));
+    border-bottom: 0;
+    margin-left: -19px;
+  }
 
 @keyframes fadein {
   from {
@@ -194,7 +191,7 @@ p.thought:after {
 
 .bubble-wrapper {
   position: absolute;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .bubble-effect {
