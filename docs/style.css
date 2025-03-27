@@ -146,6 +146,9 @@ p.thought:after {
 .italic {
   font-style: italic;
 }
+.bold {
+  font-weight: bold;
+}
 
 /* Styles when in fullscreen */
 .fullscreen > * {
