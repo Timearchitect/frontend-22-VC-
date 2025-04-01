@@ -67,14 +67,14 @@ nameField.addEventListener("keyup", (event) => {
 
 document.getElementById('delete-all-btn').addEventListener('click', () => {
 
-  if(!confirm("are you sure? ")) return // David Rhodin
+  if (!confirm("are you sure? ")) return // David Rhodin
   remove(ref(db, "/"));
 });
 
 // Function to increment the like counter
 function likeMessage(messageId) {
   const likesRef = ref(db, `/${messageId}/likes`);
-  
+
   // Use transaction to safely increment likes
   runTransaction(likesRef, (currentLikes) => {
     return (currentLikes || 0) + 1; // Increment likes by 1
@@ -86,7 +86,7 @@ function likeMessage(messageId) {
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
   const dislikesRef = ref(db, `/${messageId}/dislikes`);
-  
+
   // Use transaction to safely increment dislikes
   runTransaction(dislikesRef, (currentDislikes) => {
     return (currentDislikes || 0) + 1; // Increment dislikes by 1
@@ -95,22 +95,29 @@ function dislikeMessage(messageId) {
   });
 }
 
+// Function to determine if text should be black or white based on background color
+function getTextColor(bgColor) {
+  const r = parseInt(bgColor.substr(1, 2), 16);
+  const g = parseInt(bgColor.substr(3, 2), 16);
+  const b = parseInt(bgColor.substr(5, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 150 ? 'black' : 'white';
+}
 
 
-//document.getElementById("btn").addEventListener(
-  
+
 document.getElementById("content").addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
   if (event.target && event.target.matches("button[id^='like-btn-']")) {
     const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
     likeMessage(messageId);
-    return; 
+    return;
   }
 
   if (event.target && event.target.matches("button[id^='dislike-btn-']")) {
     const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
     dislikeMessage(messageId);
-    return; 
+    return;
   }
 
   if (btn.disabled === true) {
@@ -120,8 +127,11 @@ document.getElementById("content").addEventListener("click", (event) => {
 
     var e = event;
     console.log(e);
-    var x = Math.round((event.clientX / window.innerWidth) * 100);
-    var y = Math.round((event.clientY / window.innerHeight) * 100);
+    var offsetX = -3; // i % av viewport-bredd
+    var offsetY = -5; // i % av viewport-höjd
+
+    var x = Math.round((event.clientX / window.innerWidth) * 100 + offsetX);
+    var y = Math.round((event.clientY / window.innerHeight) * 100 + offsetY);
 
     console.log(window.innerWidth, window.innerHeight);
     console.log(x, y);
@@ -134,13 +144,14 @@ document.getElementById("content").addEventListener("click", (event) => {
         : promptMessage,
       author: nameInput,
       color: chosenColor,
-      likes: 0, 
-      dislikes: 0, 
+      likes: 0,
+      dislikes: 0,
       x: x,
       y: y,
       attributes: {
         italic: document.getElementById("italicCheckbox").checked,
         uppercase: document.getElementById("uppercaseCheckbox").checked,
+        bold: document.getElementById("boldCheckbox").checked,
       },
     });
   } else {
@@ -179,91 +190,89 @@ function writeUserData() {
   },
   { onlyOnce: true }
 ); */
-
-
-
 onChildAdded(ref(db, "/"), (data) => {
   let d = data.val();
-  const italicClass = d.attributes && d.attributes.italic ? " italic" : "";
+  const italicClass = d.attributes?.italic ? " italic" : "";
+  const boldClass = d.attributes?.bold ? " bold" : "";
+  const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
-const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+  const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+  const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
-if (d.message.length < 5) {
-  document
-    .getElementById("content")
-    .insertAdjacentHTML(
-      "beforeend",
-      `<p class="bubble${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
-        ${messageHTML}
-        <br/>
+  // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
+  document.getElementById("content").insertAdjacentHTML(
+    "beforeend",
+    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${d.y}vh;">
+      <div class="bubble-effect" id="effect-${data.key}">
+        <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
+      </div>
+    </div>`
+  );
+
+  // 💥 Steg 2: Efter 600ms – ersätt med riktig bubbla och aktivera all funktionalitet
+  setTimeout(() => {
+    const wrapper = document.getElementById(`wrap-${data.key}`);
+    const msgContent = document.getElementById(`msg-${data.key}`)?.innerHTML;
+
+    if (wrapper && msgContent) {
+      wrapper.innerHTML = `
+        <div class="splash-explosion"></div>
+        <p class="bubble${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
+          ${msgContent}
+          <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
-           <span id="like-count-${messageId}">${d.likes || 0}</span>
-           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
-           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
-      </p>`
-    );
-} else {
-  document
-    .getElementById("content")
-    .insertAdjacentHTML(
-      "beforeend",
-      `<p class="bubble speech${italicClass}" id="${data.key}" style="left:${d.x}vw; top:${d.y}vh; color:${d.color}">
-        ${messageHTML}
-        <br/>
-        
-        <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
-        <span><span id="like-count-${data.key}">${d.likes || 0}</span></span> 
-        
-        <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
-        <span><span id="dislike-count-${data.key}">${d.dislikes || 0}</span></span> 
-      </p>`
-    );
-}
+          <span id="like-count-${messageId}">${d.likes || 0}</span>
+          <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
+          <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+        </p>
+      `;
 
+      // 💨 Ta bort splash-effekten efter animation
+      setTimeout(() => {
+        wrapper.querySelector(".splash-explosion")?.remove();
+      }, 600);
 
-  // Add event listener for the "Like" button
-  document.getElementById(`like-btn-${messageId}`).addEventListener("click", (event) => {
-    event.stopPropagation(); 
-    likeMessage(messageId);
-  });
-// Add event listener for the "Dislike" button
-document.getElementById(`dislike-btn-${messageId}`).addEventListener("click", (event) => {
-  event.stopPropagation(); 
-  dislikeMessage(messageId);
-});
+      // 👍 Like-knapp
+      document.getElementById(`like-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        likeMessage(messageId);
+      });
 
-  // Update like and dislike counters when changed in Firebase
-  onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
-    document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
-  });
+      // 👎 Dislike-knapp
+      document.getElementById(`dislike-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        dislikeMessage(messageId);
+      });
 
-  onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
-    document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
-  });
+      // 🔄 Live-uppdatering
+      onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
+        document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
+      });
 
-  document
-    .getElementById(data.key)
-    .addEventListener("contextmenu", (event) => event.preventDefault());
+      onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
+        document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
+      });
 
-  let bubbleID = document.querySelector(`#${data.key}`);
+      // 🚫 Inaktivera högerklick
+      const bubble = document.getElementById(data.key);
+      bubble.addEventListener("contextmenu", (event) => event.preventDefault());
 
-  document.getElementById(data.key).addEventListener("mouseup", (event) => {
-    if (event.button == 2) {
-      alert("Delete message?");
-      bubbleID.remove();
-      remove(ref(db, bubbleID.id));
+      // 🧼 Radera meddelande vid högerklick
+      bubble.addEventListener("mouseup", (event) => {
+        if (event.button === 2) {
+          alert("Delete message?");
+          bubble.remove();
+          remove(ref(db, bubble.id));
+        }
+      });
     }
-  });
-
-  /*document.getElementById(
-    "content"
-  ).innerHTML += `<p class="bubble speech" style="left:${d.x}vw; top:${d.y}vh">${d.message}</p>`;*/
-  console.log(d);
+  }, 600);
 });
 
+// 🧹 Radera bubblan från DOM om den tas bort från Firebase
 onChildRemoved(ref(db, "/"), (data) => {
-  console.log(document.querySelector(`#${data.key}`).remove());
-  console.log(document.getElementById(data.key).remove());
+  document.querySelector(`#${data.key}`)?.remove();
+  document.getElementById(data.key)?.remove();
 });
 
 /*
