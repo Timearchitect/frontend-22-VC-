@@ -105,6 +105,25 @@ function getTextColor(bgColor) {
 }
 
 
+// New Smiley Button functionality
+document.getElementById('smileyBtn').addEventListener('click', function() {
+  const textField = document.getElementById('textField');
+  textField.value += "😊";  // Add smiley emoji to the text field
+});
+
+// New Theme Switcher functionality
+document.getElementById('themeSelector').addEventListener('change', function(event) {
+  const selectedTheme = event.target.value;
+  const body = document.body;
+
+  if (selectedTheme === 'dark') {
+    body.classList.remove('light-theme');
+    body.classList.add('dark-theme');
+  } else {
+    body.classList.remove('dark-theme');
+    body.classList.add('light-theme');
+  }
+});
 
 document.getElementById("content").addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
