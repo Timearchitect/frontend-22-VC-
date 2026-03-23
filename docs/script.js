@@ -35,6 +35,18 @@ const db = getDatabase(app); // <-----
 
 console.log(db);
 
+// Funktion för att skydda genom att förhinda/omvandla=escapea HTML-tecken
+function escapeHtml(text) {
+  const map = {
+    '&': '&#x26;',
+    '<': '&#x3C;',
+    '>': '&#x3E;',
+    '"': '&#x22;',
+    "'": '&#x27;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
 const nameField = document.getElementById("nameField");
 //sparar author
 let nameInput = "";
@@ -215,7 +227,9 @@ onChildAdded(ref(db, "/"), (data) => {
   const boldClass = d.attributes?.bold ? " bold" : "";
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
-  const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+  // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
+  // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
+  const messageHTML = `<strong>${escapeHtml(d.author)}:</strong> ${escapeHtml(d.message)}`;
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
