@@ -32,8 +32,27 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
+const placementHint = document.getElementById("placement-hint");
+const introEffectMs = 420;
+const splashCleanupMs = 380;
 
 console.log(db);
+
+function hidePlacementHint() {
+  if (placementHint) {
+    placementHint.classList.add("is-hidden");
+  }
+}
+
+function getComposerOffsetVh() {
+  const composerBar = document.querySelector(".composer-bar");
+
+  if (!composerBar || window.innerHeight === 0) {
+    return 0;
+  }
+
+  return ((composerBar.offsetHeight + 12) / window.innerHeight) * 100;
+}
 
 function sanitizeHtml(input) {
   const temp = document.createElement("div");
@@ -56,6 +75,7 @@ function sanitizeHtml(input) {
 }
 
 const nameField = document.getElementById("nameField");
+const textField = document.getElementById("textField");
 //sparar author
 let nameInput = "";
 document.getElementById("btn").addEventListener("click", () => {
@@ -127,8 +147,8 @@ function getTextColor(bgColor) {
 
 // New Smiley Button functionality
 document.getElementById('smileyBtn').addEventListener('click', function() {
-  const textField = document.getElementById('textField');
   textField.value += "😊";  // Add smiley emoji to the text field
+  textField.focus();
 });
 
 // New Theme Switcher functionality
@@ -160,17 +180,32 @@ document.getElementById("content").addEventListener("click", (event) => {
   }
 
   if (btn.disabled === true) {
-    var promptMessage = prompt("Write you message:", "message");
-    if (promptMessage == null) return;
+    const messageValue = textField.value.trim();
+
+    if (messageValue.length === 0) {
+      textField.focus();
+      textField.style.borderColor = "#d14d72";
+      textField.style.boxShadow = "0 0 0 3px rgba(209, 77, 114, 0.18)";
+      setTimeout(() => {
+        textField.style.borderColor = "";
+        textField.style.boxShadow = "";
+      }, 900);
+      return;
+    }
+
     const chosenColor = document.getElementById("post-it-color").value;
 
     var e = event;
     console.log(e);
     var offsetX = -3; // i % av viewport-bredd
     var offsetY = -5; // i % av viewport-höjd
+    var minY = Math.ceil(getComposerOffsetVh());
 
     var x = Math.round((event.clientX / window.innerWidth) * 100 + offsetX);
-    var y = Math.round((event.clientY / window.innerHeight) * 100 + offsetY);
+    var y = Math.max(
+      Math.round((event.clientY / window.innerHeight) * 100 + offsetY),
+      minY
+    );
 
     console.log(window.innerWidth, window.innerHeight);
     console.log(x, y);
@@ -179,8 +214,8 @@ document.getElementById("content").addEventListener("click", (event) => {
       username: "Alrik",
       dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
       message: document.getElementById("uppercaseCheckbox").checked
-        ? promptMessage.toUpperCase()
-        : promptMessage,
+        ? messageValue.toUpperCase()
+        : messageValue,
       author: nameInput,
       color: chosenColor,
       likes: 0,
@@ -193,6 +228,9 @@ document.getElementById("content").addEventListener("click", (event) => {
         bold: document.getElementById("boldCheckbox").checked,
       },
     });
+
+    textField.value = "";
+    textField.focus();
   } else {
     alert(
       "Warning! Your post have no author. Please submit a name in the field and confirm."
@@ -230,11 +268,14 @@ function writeUserData() {
   { onlyOnce: true }
 ); */
 onChildAdded(ref(db, "/"), (data) => {
+  hidePlacementHint();
+
   let d = data.val();
   const italicClass = d.attributes?.italic ? " italic" : "";
   const boldClass = d.attributes?.bold ? " bold" : "";
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
+  const safeTop = Math.max(Number(d.y) || 0, getComposerOffsetVh());
   // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
   // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
   const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
@@ -243,14 +284,14 @@ onChildAdded(ref(db, "/"), (data) => {
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
   document.getElementById("content").insertAdjacentHTML(
     "beforeend",
-    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${d.y}vh;">
+    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${safeTop}vh;">
       <div class="bubble-effect" id="effect-${data.key}">
         <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
       </div>
     </div>`
   );
 
-  // 💥 Steg 2: Efter 600ms – ersätt med riktig bubbla och aktivera all funktionalitet
+  // 💥 Steg 2: Efter intro-animationen – ersätt med riktig bubbla och aktivera all funktionalitet
   setTimeout(() => {
     const wrapper = document.getElementById(`wrap-${data.key}`);
     const msgContent = document.getElementById(`msg-${data.key}`)?.innerHTML;
@@ -258,7 +299,7 @@ onChildAdded(ref(db, "/"), (data) => {
     if (wrapper && msgContent) {
       wrapper.innerHTML = `
         <div class="splash-explosion"></div>
-        <p class="bubble${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
+        <p class="bubble animate-in${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
           ${msgContent}
           <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
@@ -271,7 +312,7 @@ onChildAdded(ref(db, "/"), (data) => {
       // 💨 Ta bort splash-effekten efter animation
       setTimeout(() => {
         wrapper.querySelector(".splash-explosion")?.remove();
-      }, 600);
+      }, splashCleanupMs);
 
       // 👍 Like-knapp
       document.getElementById(`like-btn-${messageId}`)?.addEventListener("click", (event) => {
@@ -307,7 +348,7 @@ onChildAdded(ref(db, "/"), (data) => {
         }
       });
     }
-  }, 600);
+  }, introEffectMs);
 });
 
 // 🧹 Radera bubblan från DOM om den tas bort från Firebase
