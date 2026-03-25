@@ -33,8 +33,25 @@ const deleteSound = new Audio("./pop.mp3");
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
+const placementHint = document.getElementById("placement-hint");
+const content = document.getElementById("content");
+const contentTopMargin = content.style.marginTop;
+const messageModal = document.getElementById("message-modal");
+const modalSmileyBtn = document.getElementById("modal-smiley-btn");
+const modalSubmitBtn = document.getElementById("modal-submit-btn");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
+const headerColorInput = document.getElementById("post-it-color");
+const body = document.body;
+const introEffectMs = 420;
+const splashCleanupMs = 380;
 
 console.log(db);
+
+function hidePlacementHint() {
+  if (placementHint) {
+    placementHint.classList.add("is-hidden");
+  }
+}
 
 function sanitizeHtml(input) {
   const temp = document.createElement("div");
@@ -57,6 +74,104 @@ function sanitizeHtml(input) {
 }
 
 const nameField = document.getElementById("nameField");
+const textField = document.getElementById("textField");
+let pendingPlacement = null;
+
+function openMessageModal() {
+  messageModal.classList.add("is-open");
+  messageModal.setAttribute("aria-hidden", "false");
+  textField.focus();
+}
+
+function closeMessageModal(resetInput = true) {
+  messageModal.classList.remove("is-open");
+  messageModal.setAttribute("aria-hidden", "true");
+  pendingPlacement = null;
+
+  if (resetInput) {
+    textField.value = "";
+  }
+}
+
+function highlightModalInput() {
+  textField.focus();
+  textField.style.borderColor = "#d14d72";
+  textField.style.boxShadow = "0 0 0 3px rgba(209, 77, 114, 0.18)";
+
+  setTimeout(() => {
+    textField.style.borderColor = "";
+    textField.style.boxShadow = "";
+  }, 900);
+}
+
+function getPlacementFromClick(event) {
+  const rect = content.getBoundingClientRect();
+  const normalizedX = ((event.clientX - rect.left) / rect.width) * 100;
+  const normalizedY = ((event.clientY - rect.top) / rect.height) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, Math.round(normalizedX))),
+    y: Math.max(0, Math.min(100, Math.round(normalizedY))),
+  };
+}
+
+function getNormalizedRenderPosition(data) {
+  const rect = content.getBoundingClientRect();
+  const rawX = Number(data.x) || 0;
+  const rawY = Number(data.y) || 0;
+
+  if (data.coordinateSpace === "content-percent") {
+    return {
+      x: Math.max(0, Math.min(100, rawX)),
+      y: Math.max(0, Math.min(100, rawY)),
+    };
+  }
+
+  const viewportXpx = (rawX / 100) * window.innerWidth;
+  const viewportYpx = (rawY / 100) * window.innerHeight;
+  const translatedX = ((viewportXpx - rect.left) / rect.width) * 100;
+  const translatedY = ((viewportYpx - rect.top) / rect.height) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, translatedX)),
+    y: Math.max(0, Math.min(100, translatedY)),
+  };
+}
+
+function submitMessageAtPendingPosition() {
+  if (!pendingPlacement) return;
+
+  const messageValue = textField.value.trim();
+
+  if (messageValue.length === 0) {
+    highlightModalInput();
+    return;
+  }
+
+  const chosenColor = headerColorInput.value;
+
+  push(ref(db, "/"), {
+    username: "Alrik",
+    dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
+    message: document.getElementById("uppercaseCheckbox").checked
+      ? messageValue.toUpperCase()
+      : messageValue,
+    author: nameInput,
+    color: chosenColor,
+    likes: 0,
+    dislikes: 0,
+    coordinateSpace: "content-percent",
+    x: pendingPlacement.x,
+    y: pendingPlacement.y,
+    attributes: {
+      italic: document.getElementById("italicCheckbox").checked,
+      uppercase: document.getElementById("uppercaseCheckbox").checked,
+      bold: document.getElementById("boldCheckbox").checked,
+    },
+  });
+
+  closeMessageModal(true);
+}
 //sparar author
 let nameInput = "";
 document.getElementById("btn").addEventListener("click", () => {
@@ -125,28 +240,58 @@ function getTextColor(bgColor) {
   return brightness > 150 ? 'black' : 'white';
 }
 
-
-// New Smiley Button functionality
-document.getElementById('smileyBtn').addEventListener('click', function() {
-  const textField = document.getElementById('textField');
+modalSmileyBtn.addEventListener("click", () => {
   textField.value += "😊";  // Add smiley emoji to the text field
+  textField.focus();
+});
+
+modalSubmitBtn.addEventListener("click", () => {
+  submitMessageAtPendingPosition();
+});
+
+modalCancelBtn.addEventListener("click", () => {
+  closeMessageModal(true);
+});
+
+textField.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeMessageModal(true);
+  }
+
+  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    submitMessageAtPendingPosition();
+  }
+});
+
+messageModal.addEventListener("click", (event) => {
+  if (event.target === messageModal) {
+    closeMessageModal(true);
+  }
 });
 
 // New Theme Switcher functionality
 document.getElementById('themeSelector').addEventListener('change', function(event) {
   const selectedTheme = event.target.value;
-  const body = document.body;
-
-  if (selectedTheme === 'dark') {
-    body.classList.remove('light-theme');
+  switch (selectedTheme) {
+    case 'dark':
+    body.classList.remove('light-theme','browser');
     body.classList.add('dark-theme');
-  } else {
-    body.classList.remove('dark-theme');
-    body.classList.add('light-theme');
+  break;
+     case 'browser':
+        body.classList.remove('dark-theme','light-theme');
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          body.classList.add('dark-theme','browser');
+      else    
+          body.classList.add('light-theme','browser');
+   break;
+      case 'light':
+      body.classList.remove('dark-theme','browser');
+      body.classList.add('light-theme');
   }
 });
 
-document.getElementById("content").addEventListener("click", (event) => {
+content.addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
   if (event.target && event.target.matches("button[id^='like-btn-']")) {
     const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
@@ -161,39 +306,8 @@ document.getElementById("content").addEventListener("click", (event) => {
   }
 
   if (btn.disabled === true) {
-    var promptMessage = prompt("Write you message:", "message");
-    if (promptMessage == null) return;
-    const chosenColor = document.getElementById("post-it-color").value;
-
-    var e = event;
-    console.log(e);
-    var offsetX = -3; // i % av viewport-bredd
-    var offsetY = -5; // i % av viewport-höjd
-
-    var x = Math.round((event.clientX / window.innerWidth) * 100 + offsetX);
-    var y = Math.round((event.clientY / window.innerHeight) * 100 + offsetY);
-
-    console.log(window.innerWidth, window.innerHeight);
-    console.log(x, y);
-
-    push(ref(db, "/"), {
-      username: "Alrik",
-      dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
-      message: document.getElementById("uppercaseCheckbox").checked
-        ? promptMessage.toUpperCase()
-        : promptMessage,
-      author: nameInput,
-      color: chosenColor,
-      likes: 0,
-      dislikes: 0,
-      x: x,
-      y: y,
-      attributes: {
-        italic: document.getElementById("italicCheckbox").checked,
-        uppercase: document.getElementById("uppercaseCheckbox").checked,
-        bold: document.getElementById("boldCheckbox").checked,
-      },
-    });
+    pendingPlacement = getPlacementFromClick(event);
+    openMessageModal();
   } else {
     alert(
       "Warning! Your post have no author. Please submit a name in the field and confirm."
@@ -231,27 +345,30 @@ function writeUserData() {
   { onlyOnce: true }
 ); */
 onChildAdded(ref(db, "/"), (data) => {
+  hidePlacementHint();
+
   let d = data.val();
   const italicClass = d.attributes?.italic ? " italic" : "";
   const boldClass = d.attributes?.bold ? " bold" : "";
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
+  const position = getNormalizedRenderPosition(d);
   // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
   // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
   const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
-  document.getElementById("content").insertAdjacentHTML(
+ content.insertAdjacentHTML(
     "beforeend",
-    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${d.y}vh;">
+    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${position.x}%; top:${position.y}%;">
       <div class="bubble-effect" id="effect-${data.key}">
         <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
       </div>
     </div>`
   );
 
-  // 💥 Steg 2: Efter 600ms – ersätt med riktig bubbla och aktivera all funktionalitet
+  // 💥 Steg 2: Efter intro-animationen – ersätt med riktig bubbla och aktivera all funktionalitet
   setTimeout(() => {
     const wrapper = document.getElementById(`wrap-${data.key}`);
     const msgContent = document.getElementById(`msg-${data.key}`)?.innerHTML;
@@ -259,7 +376,7 @@ onChildAdded(ref(db, "/"), (data) => {
     if (wrapper && msgContent) {
       wrapper.innerHTML = `
         <div class="splash-explosion"></div>
-        <p class="bubble${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
+        <p class="bubble animate-in${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
           ${msgContent}
           <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
@@ -272,7 +389,7 @@ onChildAdded(ref(db, "/"), (data) => {
       // 💨 Ta bort splash-effekten efter animation
       setTimeout(() => {
         wrapper.querySelector(".splash-explosion")?.remove();
-      }, 600);
+      }, splashCleanupMs);
 
       // 👍 Like-knapp
       document.getElementById(`like-btn-${messageId}`)?.addEventListener("click", (event) => {
@@ -433,16 +550,21 @@ function checkFullscreen() {
     window.innerWidth == screen.width
   ) {
     // In fullscreen
-    document.body.className = "fullscreen";
+    setTimeout(()=>{
+      document.body.classList.add("fullscreen");
+      content.style.marginTop = "unset";
+    },1000)
+    
   } else {
     // Not in fullscreen
-    document.body.className = "";
+      content.style.marginTop = contentTopMargin;
+      document.body.classList.remove("fullscreen");
+
   }
 }
 
 // Check fullscreen status every 10 seconds
 // setInterval(checkFullscreen, 10000);
-
 
 window.addEventListener('resize', checkFullscreen, true);
 

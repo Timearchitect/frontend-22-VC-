@@ -34,26 +34,63 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      End Google Tag Manager (noscript) -->
     <!--  <input type="text" id="inName" />-->
-    <button id="btn">Submit Name</button> <input type="text" id="nameField"> <!-- <a href="./pages/AboutUs/aboutUs.html">About Us</a> Removing the link to the bootom of the page-->
-    <label for="post-it-color">color</label>
-    <input type="color" name="post-it-color" id="post-it-color" value="#000000" />    
-    </form>
-    <input type="checkbox" id="uppercaseCheckbox"><label for="uppercaseCheckbox">uppercase</label>
-    <input type="checkbox" id="italicCheckbox"><label for="italicCheckbox">italic</label>
-    <input type="checkbox" id="boldCheckbox"><label for="boldCheckbox">bold</label>
-    <button id="smileyBtn">Add Smiley 😊</button> 
-    <textarea id="textField" placeholder="Type something..."></textarea>
+    <header class="composer-bar">
+      <div class="composer-bar__content">
+        <div class="composer-group composer-group--identity">
+          <button id="btn">Submit Name</button>
+          <input type="text" id="nameField" placeholder="Your name">
+        </div>
 
-    <label for="themeSelector">Select Theme:</label>
-    <select id="themeSelector">
-      <option value="light">Light Theme</option>
-      <option value="dark">Dark Theme</option>
-    </select>
+        <div class="composer-group composer-group--options">
+          <label for="post-it-color">color</label>
+          <input type="color" name="post-it-color" id="post-it-color" value="#000000" />
 
+          <label class="toggle-option" for="uppercaseCheckbox">
+            <input type="checkbox" id="uppercaseCheckbox">
+            <span>uppercase</span>
+          </label>
 
-    <button id="delete-all-btn">Delete All Notes</button>
-    <button type="text">Color theme</button>
-    <div id="content"></div>
+          <label class="toggle-option" for="italicCheckbox">
+            <input type="checkbox" id="italicCheckbox">
+            <span>italic</span>
+          </label>
+
+          <label class="toggle-option" for="boldCheckbox">
+            <input type="checkbox" id="boldCheckbox">
+            <span>bold</span>
+          </label>
+        </div>
+
+        <div class="composer-group composer-group--actions">
+          <label for="themeSelector">Select Theme:</label>
+          <select id="themeSelector">
+            <option value="light">Light Theme</option>
+            <option value="browser">Based on Browser</option>
+            <option value="dark">Dark Theme</option>
+          </select>
+
+          <button id="delete-all-btn">Delete All Notes</button>
+          <button type="text">Color theme</button>
+
+        </div>
+      </div>
+    </header>
+
+    <div id="content">
+      <div id="placement-hint">Press the page to place your note</div>
+    </div>
+
+    <div id="message-modal" class="message-modal" aria-hidden="true">
+      <div class="message-modal__card" role="dialog" aria-modal="true" aria-labelledby="message-modal-title">
+        <h3 id="message-modal-title">Write your message</h3>
+        <textarea id="textField" placeholder="Type your note here..."></textarea>
+        <div class="message-modal__actions">
+          <button id="modal-smiley-btn" type="button">Add Smiley 😊</button>
+          <button id="modal-cancel-btn" type="button">Cancel</button>
+          <button id="modal-submit-btn" type="button">Place Note</button>
+        </div>
+      </div>
+    </div>
 
     <section id="hover-fun">
   <h2>Hover Surprise!</h2>
