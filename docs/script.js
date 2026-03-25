@@ -35,6 +35,26 @@ const db = getDatabase(app); // <-----
 
 console.log(db);
 
+function sanitizeHtml(input) {
+  const temp = document.createElement("div");
+  temp.innerHTML = input;
+
+  temp.querySelectorAll("script").forEach(el => el.remove());
+
+  // Ta bort farliga attribut + autoplay
+  temp.querySelectorAll("*").forEach(el => {
+    [...el.attributes].forEach(attr => {
+      const name = attr.name.toLowerCase();
+
+      if (name.startsWith("on") || name === "autoplay") {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return temp.innerHTML;
+}
+
 const nameField = document.getElementById("nameField");
 //sparar author
 let nameInput = "";
@@ -215,7 +235,9 @@ onChildAdded(ref(db, "/"), (data) => {
   const boldClass = d.attributes?.bold ? " bold" : "";
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
-  const messageHTML = `<strong>${d.author}:</strong> ${d.message}`;
+  // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
+  // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
+  const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
