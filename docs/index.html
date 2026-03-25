@@ -61,11 +61,6 @@
           </label>
         </div>
 
-        <div class="composer-group composer-group--message">
-          <button id="smileyBtn">Add Smiley 😊</button>
-          <textarea id="textField" placeholder="Type something..."></textarea>
-        </div>
-
         <div class="composer-group composer-group--actions">
           <label for="themeSelector">Select Theme:</label>
           <select id="themeSelector">
@@ -80,6 +75,18 @@
 
     <div id="content">
       <div id="placement-hint">Press the page to place your note</div>
+    </div>
+
+    <div id="message-modal" class="message-modal" aria-hidden="true">
+      <div class="message-modal__card" role="dialog" aria-modal="true" aria-labelledby="message-modal-title">
+        <h3 id="message-modal-title">Write your message</h3>
+        <textarea id="textField" placeholder="Type your note here..."></textarea>
+        <div class="message-modal__actions">
+          <button id="modal-smiley-btn" type="button">Add Smiley 😊</button>
+          <button id="modal-cancel-btn" type="button">Cancel</button>
+          <button id="modal-submit-btn" type="button">Place Note</button>
+        </div>
+      </div>
     </div>
 
     <section id="hover-fun">

@@ -33,6 +33,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
 const placementHint = document.getElementById("placement-hint");
+const content = document.getElementById("content");
+const messageModal = document.getElementById("message-modal");
+const modalSmileyBtn = document.getElementById("modal-smiley-btn");
+const modalSubmitBtn = document.getElementById("modal-submit-btn");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
+const headerColorInput = document.getElementById("post-it-color");
 const introEffectMs = 420;
 const splashCleanupMs = 380;
 
@@ -42,16 +48,6 @@ function hidePlacementHint() {
   if (placementHint) {
     placementHint.classList.add("is-hidden");
   }
-}
-
-function getComposerOffsetVh() {
-  const composerBar = document.querySelector(".composer-bar");
-
-  if (!composerBar || window.innerHeight === 0) {
-    return 0;
-  }
-
-  return ((composerBar.offsetHeight + 12) / window.innerHeight) * 100;
 }
 
 function sanitizeHtml(input) {
@@ -76,6 +72,103 @@ function sanitizeHtml(input) {
 
 const nameField = document.getElementById("nameField");
 const textField = document.getElementById("textField");
+let pendingPlacement = null;
+
+function openMessageModal() {
+  messageModal.classList.add("is-open");
+  messageModal.setAttribute("aria-hidden", "false");
+  textField.focus();
+}
+
+function closeMessageModal(resetInput = true) {
+  messageModal.classList.remove("is-open");
+  messageModal.setAttribute("aria-hidden", "true");
+  pendingPlacement = null;
+
+  if (resetInput) {
+    textField.value = "";
+  }
+}
+
+function highlightModalInput() {
+  textField.focus();
+  textField.style.borderColor = "#d14d72";
+  textField.style.boxShadow = "0 0 0 3px rgba(209, 77, 114, 0.18)";
+
+  setTimeout(() => {
+    textField.style.borderColor = "";
+    textField.style.boxShadow = "";
+  }, 900);
+}
+
+function getPlacementFromClick(event) {
+  const rect = content.getBoundingClientRect();
+  const normalizedX = ((event.clientX - rect.left) / rect.width) * 100;
+  const normalizedY = ((event.clientY - rect.top) / rect.height) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, Math.round(normalizedX))),
+    y: Math.max(0, Math.min(100, Math.round(normalizedY))),
+  };
+}
+
+function getNormalizedRenderPosition(data) {
+  const rect = content.getBoundingClientRect();
+  const rawX = Number(data.x) || 0;
+  const rawY = Number(data.y) || 0;
+
+  if (data.coordinateSpace === "content-percent") {
+    return {
+      x: Math.max(0, Math.min(100, rawX)),
+      y: Math.max(0, Math.min(100, rawY)),
+    };
+  }
+
+  const viewportXpx = (rawX / 100) * window.innerWidth;
+  const viewportYpx = (rawY / 100) * window.innerHeight;
+  const translatedX = ((viewportXpx - rect.left) / rect.width) * 100;
+  const translatedY = ((viewportYpx - rect.top) / rect.height) * 100;
+
+  return {
+    x: Math.max(0, Math.min(100, translatedX)),
+    y: Math.max(0, Math.min(100, translatedY)),
+  };
+}
+
+function submitMessageAtPendingPosition() {
+  if (!pendingPlacement) return;
+
+  const messageValue = textField.value.trim();
+
+  if (messageValue.length === 0) {
+    highlightModalInput();
+    return;
+  }
+
+  const chosenColor = headerColorInput.value;
+
+  push(ref(db, "/"), {
+    username: "Alrik",
+    dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
+    message: document.getElementById("uppercaseCheckbox").checked
+      ? messageValue.toUpperCase()
+      : messageValue,
+    author: nameInput,
+    color: chosenColor,
+    likes: 0,
+    dislikes: 0,
+    coordinateSpace: "content-percent",
+    x: pendingPlacement.x,
+    y: pendingPlacement.y,
+    attributes: {
+      italic: document.getElementById("italicCheckbox").checked,
+      uppercase: document.getElementById("uppercaseCheckbox").checked,
+      bold: document.getElementById("boldCheckbox").checked,
+    },
+  });
+
+  closeMessageModal(true);
+}
 //sparar author
 let nameInput = "";
 document.getElementById("btn").addEventListener("click", () => {
@@ -144,11 +237,34 @@ function getTextColor(bgColor) {
   return brightness > 150 ? 'black' : 'white';
 }
 
-
-// New Smiley Button functionality
-document.getElementById('smileyBtn').addEventListener('click', function() {
+modalSmileyBtn.addEventListener("click", () => {
   textField.value += "😊";  // Add smiley emoji to the text field
   textField.focus();
+});
+
+modalSubmitBtn.addEventListener("click", () => {
+  submitMessageAtPendingPosition();
+});
+
+modalCancelBtn.addEventListener("click", () => {
+  closeMessageModal(true);
+});
+
+textField.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeMessageModal(true);
+  }
+
+  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    submitMessageAtPendingPosition();
+  }
+});
+
+messageModal.addEventListener("click", (event) => {
+  if (event.target === messageModal) {
+    closeMessageModal(true);
+  }
 });
 
 // New Theme Switcher functionality
@@ -165,7 +281,7 @@ document.getElementById('themeSelector').addEventListener('change', function(eve
   }
 });
 
-document.getElementById("content").addEventListener("click", (event) => {
+content.addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
   if (event.target && event.target.matches("button[id^='like-btn-']")) {
     const messageId = event.target.id.split("-")[2]; // Extract message ID from button ID
@@ -180,57 +296,8 @@ document.getElementById("content").addEventListener("click", (event) => {
   }
 
   if (btn.disabled === true) {
-    const messageValue = textField.value.trim();
-
-    if (messageValue.length === 0) {
-      textField.focus();
-      textField.style.borderColor = "#d14d72";
-      textField.style.boxShadow = "0 0 0 3px rgba(209, 77, 114, 0.18)";
-      setTimeout(() => {
-        textField.style.borderColor = "";
-        textField.style.boxShadow = "";
-      }, 900);
-      return;
-    }
-
-    const chosenColor = document.getElementById("post-it-color").value;
-
-    var e = event;
-    console.log(e);
-    var offsetX = -3; // i % av viewport-bredd
-    var offsetY = -5; // i % av viewport-höjd
-    var minY = Math.ceil(getComposerOffsetVh());
-
-    var x = Math.round((event.clientX / window.innerWidth) * 100 + offsetX);
-    var y = Math.max(
-      Math.round((event.clientY / window.innerHeight) * 100 + offsetY),
-      minY
-    );
-
-    console.log(window.innerWidth, window.innerHeight);
-    console.log(x, y);
-
-    push(ref(db, "/"), {
-      username: "Alrik",
-      dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
-      message: document.getElementById("uppercaseCheckbox").checked
-        ? messageValue.toUpperCase()
-        : messageValue,
-      author: nameInput,
-      color: chosenColor,
-      likes: 0,
-      dislikes: 0,
-      x: x,
-      y: y,
-      attributes: {
-        italic: document.getElementById("italicCheckbox").checked,
-        uppercase: document.getElementById("uppercaseCheckbox").checked,
-        bold: document.getElementById("boldCheckbox").checked,
-      },
-    });
-
-    textField.value = "";
-    textField.focus();
+    pendingPlacement = getPlacementFromClick(event);
+    openMessageModal();
   } else {
     alert(
       "Warning! Your post have no author. Please submit a name in the field and confirm."
@@ -275,7 +342,7 @@ onChildAdded(ref(db, "/"), (data) => {
   const boldClass = d.attributes?.bold ? " bold" : "";
   const combinedClasses = `${italicClass}${boldClass}`;
   const messageId = data.key;
-  const safeTop = Math.max(Number(d.y) || 0, getComposerOffsetVh());
+  const position = getNormalizedRenderPosition(d);
   // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
   // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
   const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
@@ -284,7 +351,7 @@ onChildAdded(ref(db, "/"), (data) => {
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
   document.getElementById("content").insertAdjacentHTML(
     "beforeend",
-    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${d.x}vw; top:${safeTop}vh;">
+    `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${position.x}%; top:${position.y}%;">
       <div class="bubble-effect" id="effect-${data.key}">
         <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
       </div>
