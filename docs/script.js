@@ -35,16 +35,24 @@ const db = getDatabase(app); // <-----
 
 console.log(db);
 
-// Funktion för att skydda genom att förhinda/omvandla=escapea HTML-tecken
-function escapeHtml(text) {
-  const map = {
-    '&': '&#x26;',
-    '<': '&#x3C;',
-    '>': '&#x3E;',
-    '"': '&#x22;',
-    "'": '&#x27;'
-  };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+function sanitizeHtml(input) {
+  const temp = document.createElement("div");
+  temp.innerHTML = input;
+
+  temp.querySelectorAll("script").forEach(el => el.remove());
+
+  // Ta bort farliga attribut + autoplay
+  temp.querySelectorAll("*").forEach(el => {
+    [...el.attributes].forEach(attr => {
+      const name = attr.name.toLowerCase();
+
+      if (name.startsWith("on") || name === "autoplay") {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return temp.innerHTML;
 }
 
 const nameField = document.getElementById("nameField");
@@ -229,7 +237,7 @@ onChildAdded(ref(db, "/"), (data) => {
   const messageId = data.key;
   // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
   // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
-  const messageHTML = `<strong>${escapeHtml(d.author)}:</strong> ${escapeHtml(d.message)}`;
+  const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
