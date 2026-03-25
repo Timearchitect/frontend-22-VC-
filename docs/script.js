@@ -41,6 +41,7 @@ const modalSmileyBtn = document.getElementById("modal-smiley-btn");
 const modalSubmitBtn = document.getElementById("modal-submit-btn");
 const modalCancelBtn = document.getElementById("modal-cancel-btn");
 const headerColorInput = document.getElementById("post-it-color");
+const body = document.body;
 const introEffectMs = 420;
 const splashCleanupMs = 380;
 
@@ -272,14 +273,21 @@ messageModal.addEventListener("click", (event) => {
 // New Theme Switcher functionality
 document.getElementById('themeSelector').addEventListener('change', function(event) {
   const selectedTheme = event.target.value;
-  const body = document.body;
-
-  if (selectedTheme === 'dark') {
-    body.classList.remove('light-theme');
+  switch (selectedTheme) {
+    case 'dark':
+    body.classList.remove('light-theme','browser');
     body.classList.add('dark-theme');
-  } else {
-    body.classList.remove('dark-theme');
-    body.classList.add('light-theme');
+  break;
+     case 'browser':
+        body.classList.remove('dark-theme','light-theme');
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          body.classList.add('dark-theme','browser');
+      else    
+          body.classList.add('light-theme','browser');
+   break;
+      case 'light':
+      body.classList.remove('dark-theme','browser');
+      body.classList.add('light-theme');
   }
 });
 
@@ -543,14 +551,15 @@ function checkFullscreen() {
   ) {
     // In fullscreen
     setTimeout(()=>{
-      document.body.className = "fullscreen";
+      document.body.classList.add("fullscreen");
       content.style.marginTop = "unset";
     },1000)
     
   } else {
     // Not in fullscreen
-    content.style.marginTop = contentTopMargin;
-    document.body.className = "";
+      content.style.marginTop = contentTopMargin;
+      document.body.classList.remove("fullscreen");
+
   }
 }
 
