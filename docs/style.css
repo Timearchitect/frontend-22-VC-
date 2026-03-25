@@ -301,7 +301,6 @@ body {
 
 .bubble {
   position: absolute;
-  max-width: 280px;
   padding: 14px 20px;
   background-color: var(--white);
   color: var(--grey);

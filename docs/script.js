@@ -35,6 +35,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
 const placementHint = document.getElementById("placement-hint");
 const content = document.getElementById("content");
+const contentTopMargin = content.style.marginTop;
 const messageModal = document.getElementById("message-modal");
 const modalSmileyBtn = document.getElementById("modal-smiley-btn");
 const modalSubmitBtn = document.getElementById("modal-submit-btn");
@@ -350,7 +351,7 @@ onChildAdded(ref(db, "/"), (data) => {
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
-  document.getElementById("content").insertAdjacentHTML(
+ content.insertAdjacentHTML(
     "beforeend",
     `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${position.x}%; top:${position.y}%;">
       <div class="bubble-effect" id="effect-${data.key}">
@@ -541,16 +542,20 @@ function checkFullscreen() {
     window.innerWidth == screen.width
   ) {
     // In fullscreen
-    document.body.className = "fullscreen";
+    setTimeout(()=>{
+      document.body.className = "fullscreen";
+      content.style.marginTop = "unset";
+    },1000)
+    
   } else {
     // Not in fullscreen
+    content.style.marginTop = contentTopMargin;
     document.body.className = "";
   }
 }
 
 // Check fullscreen status every 10 seconds
 // setInterval(checkFullscreen, 10000);
-
 
 window.addEventListener('resize', checkFullscreen, true);
 
