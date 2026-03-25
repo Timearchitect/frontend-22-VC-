@@ -447,3 +447,5 @@ function checkFullscreen() {
 window.addEventListener('resize', checkFullscreen, true);
 
 
+//---- Color theme ---- // 
+
