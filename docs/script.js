@@ -28,7 +28,8 @@ const firebaseConfig = {
   appId: "1:632318648569:web:60f9813437fa829e598228",
 };
 
-// Initialize Firebase
+const deleteSound = new Audio("./pop.mp3");
+
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
@@ -301,14 +302,20 @@ onChildAdded(ref(db, "/"), (data) => {
       // 🧼 Radera meddelande vid högerklick
       bubble.addEventListener("mouseup", (event) => {
         if (event.button === 2) {
-          alert("Delete message?");
-          bubble.remove();
-          remove(ref(db, bubble.id));
+          if (confirm("Delete message?")) {
+
+            deleteSound.currentTime = 0; 
+            deleteSound.play().catch(err => console.log(err));
+
+            bubble.remove();
+            remove(ref(db, bubble.id));
+          }
         }
       });
+
     }
-  }, 600);
-});
+  }, 699);
+}); 
 
 // 🧹 Radera bubblan från DOM om den tas bort från Firebase
 onChildRemoved(ref(db, "/"), (data) => {
