@@ -16,6 +16,7 @@ body {
   background-color: lightpink;
   font-family: "Segoe UI", sans-serif;
   color: var(--composer-text);
+  transition: background 1s;
 }
 
 #content {
@@ -561,3 +562,4 @@ body.dark-theme header.composer-bar {
 body.dark-theme #content {
   filter:brightness(0.8);
 }
+

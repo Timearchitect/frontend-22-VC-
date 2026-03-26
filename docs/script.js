@@ -3,6 +3,7 @@ import {
   getDatabase,
   ref,
   set,
+  get,
   onValue,
   runTransaction,
   remove,
@@ -569,3 +570,33 @@ function checkFullscreen() {
 window.addEventListener('resize', checkFullscreen, true);
 
 
+//---- Color theme ---- // 
+
+function saveBackground(color) {
+  set(ref(db,'settings/background'),color);
+}
+
+
+function loadBackground(){
+  get(ref(db,'settings/background')).then(snapshot =>{
+    if(snapshot.exists()){
+      const color = snapshot.val();
+      document.body.style.background = snapshot.val();
+      colorPicker.value = color;
+    }
+  });
+}
+
+
+const colorPicker = document.querySelector('#colorPicker');
+
+colorPicker.addEventListener('input',(e)=>{
+  const color = e.target.value;
+  document.body.style.background = color;
+  saveBackground(color);
+});
+
+
+window.onload = ()=> {
+  loadBackground();
+}
