@@ -40,6 +40,7 @@
           <button id="btn">Submit Name</button>
           <input type="text" id="nameField" placeholder="Your name">
         </div>
+        
 
         <div class="composer-group composer-group--options">
           <label for="post-it-color">color</label>
@@ -53,16 +54,19 @@
           <label class="toggle-option" for="italicCheckbox">
             <input type="checkbox" id="italicCheckbox">
             <span>italic</span>
+            
           </label>
 
           <label class="toggle-option" for="boldCheckbox">
             <input type="checkbox" id="boldCheckbox">
             <span>bold</span>
           </label>
+          
         </div>
 
         <div class="composer-group composer-group--actions">
           <label for="themeSelector">Select Theme:</label>
+          <div id="google_translate_element"></div>
           <select id="themeSelector">
             <option value="light">Light Theme</option>
             <option value="browser">Based on Browser</option>
@@ -113,4 +117,14 @@
       </nav>
     </footer>
   </body>
+  <script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'sv', 
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+}
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </html>
