@@ -412,7 +412,7 @@ onChildAdded(ref(db, "/"), (data) => {
       `;
 
       onValue(ref(db, `/${messageId}/message`), (snapshot) => {
-        const textSpan = document.getElementById(`text-content-${messageId}`);
+        const textSpan = document.querySelector(`#text-content-${messageId}`);
         if (textSpan && snapshot.exists()) {
           textSpan.innerHTML = snapshot.val();
         }
