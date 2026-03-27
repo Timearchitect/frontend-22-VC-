@@ -1,3 +1,4 @@
+import { deleteMessageById } from './deleteMessage.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
 import {
   getDatabase,
@@ -384,6 +385,7 @@ onChildAdded(ref(db, "/"), (data) => {
           <span id="like-count-${messageId}">${d.likes || 0}</span>
           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+          <button id="delete-btn-${messageId}" class="emoji-btn delete-btn" title="delete message">🗑️</button>
         </p>
       `;
 
@@ -402,6 +404,12 @@ onChildAdded(ref(db, "/"), (data) => {
       document.getElementById(`dislike-btn-${messageId}`)?.addEventListener("click", (event) => {
         event.stopPropagation();
         dislikeMessage(messageId);
+      });
+      
+      // Delete button
+      document.getElementById(`delete-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        deleteMessageById(db, messageId, deleteSound);
       });
 
       // 🔄 Live-uppdatering
