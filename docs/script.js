@@ -1,3 +1,4 @@
+import { editMessage } from './editMessages.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
 import {
   getDatabase,
@@ -10,6 +11,7 @@ import {
   push,
   onChildAdded,
   onChildRemoved,
+  update
 } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js"; // <---
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -46,6 +48,8 @@ const body = document.body;
 const introEffectMs = 420;
 const splashCleanupMs = 380;
 
+
+
 console.log(db);
 
 function hidePlacementHint() {
@@ -77,6 +81,25 @@ function sanitizeHtml(input) {
 const nameField = document.getElementById("nameField");
 const textField = document.getElementById("textField");
 let pendingPlacement = null;
+
+// begränsar längd på texten (Elin)
+const max_text_length = 200;
+const charCount = document.getElementById("charCount");
+textField.addEventListener("input", () => {
+  if (textField.value.length > max_text_length) {
+    textField.value = textField.value.substring(0, max_text_length);
+  }
+// Uppdatera nedräkning
+  charCount.textContent = `${textField.value.length} / ${max_text_length}`;
+
+  // Röd färg om texten är nära max
+  if (textField.value.length > max_text_length - 20) {
+    charCount.style.color = "red";
+  } else {
+    charCount.style.color = "black";
+  }
+
+});
 
 function openMessageModal() {
   messageModal.classList.add("is-open");
@@ -147,8 +170,8 @@ function submitMessageAtPendingPosition() {
   if (messageValue.length === 0) {
     highlightModalInput();
     return;
+    
   }
-
   const chosenColor = headerColorInput.value;
 
   push(ref(db, "/"), {
@@ -378,15 +401,23 @@ onChildAdded(ref(db, "/"), (data) => {
       wrapper.innerHTML = `
         <div class="splash-explosion"></div>
         <p class="bubble animate-in${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
-          ${msgContent}
+          <span id="text-content-${messageId}">${msgContent}</span>
           <br/>
           <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
           <span id="like-count-${messageId}">${d.likes || 0}</span>
           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
           <button id="delete-btn-${messageId}" class="emoji-btn">🗑️</button>
+          <button id="edit-btn-${messageId}" class="emoji-btn">✏️</button>
         </p>
       `;
+
+      onValue(ref(db, `/${messageId}/message`), (snapshot) => {
+        const textSpan = document.querySelector(`#text-content-${messageId}`);
+        if (textSpan && snapshot.exists()) {
+          textSpan.innerHTML = snapshot.val();
+        }
+      });
 
       // 💨 Ta bort splash-effekten efter animation
       setTimeout(() => {
@@ -418,6 +449,11 @@ onChildAdded(ref(db, "/"), (data) => {
     remove(ref(db, `/${messageId}`));
   }
 });
+      // ✏️ Edit-knapp
+      document.querySelector(`#edit-btn-${messageId}`)?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        editMessage(db, messageId, d.message);
+      });
 
       // 🔄 Live-uppdatering
       onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
