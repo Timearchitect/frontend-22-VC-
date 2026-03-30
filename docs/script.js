@@ -407,6 +407,7 @@ onChildAdded(ref(db, "/"), (data) => {
           <span id="like-count-${messageId}">${d.likes || 0}</span>
           <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+          <button id="delete-btn-${messageId}" class="emoji-btn">🗑️</button>
           <button id="edit-btn-${messageId}" class="emoji-btn">✏️</button>
         </p>
       `;
@@ -435,6 +436,19 @@ onChildAdded(ref(db, "/"), (data) => {
         dislikeMessage(messageId);
       });
 
+      // 🗑️ Raderings-knapp
+     document.getElementById(`delete-btn-${messageId}`)?.addEventListener("click", (event) => {
+     event.stopPropagation();
+     if (confirm("Vill du radera detta meddelande?")) {
+    
+    // Spela ljudet om det finns
+    deleteSound.currentTime = 0; 
+    deleteSound.play().catch(err => console.log(err));
+
+    // Ta bort från Firebase
+    remove(ref(db, `/${messageId}`));
+  }
+});
       // ✏️ Edit-knapp
       document.querySelector(`#edit-btn-${messageId}`)?.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -637,3 +651,35 @@ colorPicker.addEventListener('input',(e)=>{
 window.onload = ()=> {
   loadBackground();
 }
+
+
+/**
+ Automatisk rensning efter 5 minuter
+ */
+function cleanupOldMessages() {
+  const secondsToLive = 300; 
+  const expirationMs = secondsToLive * 1000;
+  const now = Date.now();
+
+  get(ref(db, "/")).then((snapshot) => {
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        const key = childSnapshot.key;
+
+        if (key === "settings") return;
+
+        const createdAt = new Date(data.dateOfCretion).getTime();
+
+        if (!isNaN(createdAt) && (now - createdAt) > expirationMs) {
+          console.log(`Rensar meddelande efter 5 minuter: ${key}`);
+          remove(ref(db, `/${key}`));
+        }
+      });
+    }
+  }).catch((err) => console.error("Rensningsfel:", err));
+}
+
+cleanupOldMessages();
+
+setInterval(cleanupOldMessages, 5000);
