@@ -301,6 +301,7 @@ body {
 }
 
 .bubble {
+  min-width: 10rem;
   position: absolute;
   padding: 14px 20px;
   background-color: var(--white);
@@ -465,12 +466,15 @@ p.thought:after {
   background-color: transparent;
   font-size: 1.5rem;
   cursor: pointer;
+  padding-right: 0;
 }
 
 .emoji-btn:hover {
   transform: scale(1.2);
 }
-
+.subBtn{
+    font-size: 1rem;
+}
 .bubble-wrapper {
   position: absolute;
   pointer-events: auto;

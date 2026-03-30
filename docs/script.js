@@ -403,12 +403,12 @@ onChildAdded(ref(db, "/"), (data) => {
         <p class="bubble animate-in${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
           <span id="text-content-${messageId}">${msgContent}</span>
           <br/>
-          <button id="like-btn-${messageId}" class="emoji-btn">👍</button>
+          <button id="like-btn-${messageId}" class="emoji-btn subBtn">👍</button>
           <span id="like-count-${messageId}">${d.likes || 0}</span>
-          <button id="dislike-btn-${messageId}" class="emoji-btn">👎</button>
+          <button id="dislike-btn-${messageId}" class="emoji-btn subBtn">👎</button>
           <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
-          <button id="delete-btn-${messageId}" class="emoji-btn">🗑️</button>
-          <button id="edit-btn-${messageId}" class="emoji-btn">✏️</button>
+          <button id="delete-btn-${messageId}" class="emoji-btn subBtn">🗑️</button>
+          <button id="edit-btn-${messageId}" class="emoji-btn subBtn">✏️</button>
         </p>
       `;
 
