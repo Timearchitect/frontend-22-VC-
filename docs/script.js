@@ -657,7 +657,7 @@ window.onload = ()=> {
  Automatisk rensning efter 5 minuter
  */
 function cleanupOldMessages() {
-  const secondsToLive = 300; 
+  const secondsToLive = 600; 
   const expirationMs = secondsToLive * 1000;
   const now = Date.now();
 
@@ -672,7 +672,7 @@ function cleanupOldMessages() {
         const createdAt = new Date(data.dateOfCretion).getTime();
 
         if (!isNaN(createdAt) && (now - createdAt) > expirationMs) {
-          console.log(`Rensar meddelande efter 5 minuter: ${key}`);
+          console.log(`Rensar meddelande efter 10 minuter: ${key}`);
           remove(ref(db, `/${key}`));
         }
       });
@@ -682,4 +682,4 @@ function cleanupOldMessages() {
 
 cleanupOldMessages();
 
-setInterval(cleanupOldMessages, 5000);
+setInterval(cleanupOldMessages, 60000); // check varje minut
