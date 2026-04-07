@@ -555,7 +555,7 @@ p.thought:after {
 body.dark-theme{
   top:0px;
   position: absolute;
-  filter:brightness(0.8);
+  /*filter:brightness(0.8);*/
   background-color: grey;
 }
 
