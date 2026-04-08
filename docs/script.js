@@ -638,7 +638,7 @@ function loadBackground(){
   });
 }
 
-
+//hej
 const colorPicker = document.querySelector('#colorPicker');
 
 colorPicker.addEventListener('input',(e)=>{
