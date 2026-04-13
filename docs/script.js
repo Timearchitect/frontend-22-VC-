@@ -43,6 +43,7 @@ const modalSmileyBtn = document.getElementById("modal-smiley-btn");
 const modalSubmitBtn = document.getElementById("modal-submit-btn");
 const modalCancelBtn = document.getElementById("modal-cancel-btn");
 const headerColorInput = document.getElementById("post-it-color");
+const weather = document.getElementById("weather-widget");
 const body = document.body;
 const introEffectMs = 420;
 const splashCleanupMs = 380;
@@ -241,7 +242,7 @@ document.getElementById("btn").addEventListener("click", () => {
 
 //tömmer fältet när man vill ändra author
 nameField.addEventListener("click", () => {
-  nameField.value = "";
+  //nameField.value = "";
   btn.innerText = "submit name";
   btn.disabled = false;
 });
@@ -342,24 +343,40 @@ document
     const selectedTheme = event.target.value;
     switch (selectedTheme) {
       case "dark":
-        body.classList.remove("light-theme", "browser");
-        body.classList.add("dark-theme");
+        setDarkMode(body,weather)
         break;
       case "browser":
-        body.classList.remove("dark-theme", "light-theme");
+        setBrowserMode(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches,body,weather)
+/*         body.classList.remove("dark-theme", "light-theme");
         if (
           window.matchMedia &&
           window.matchMedia("(prefers-color-scheme: dark)").matches
         )
           body.classList.add("dark-theme", "browser");
-        else body.classList.add("light-theme", "browser");
+        else body.classList.add("light-theme", "browser"); */
         break;
       case "light":
-        body.classList.remove("dark-theme", "browser");
-        body.classList.add("light-theme");
+        setLightMode(body,weather)
     }
   });
-
+function setDarkMode(...dom) {
+  dom.forEach(element => {
+      element.classList.remove("light-theme", "browser");
+      element.classList.add("dark-theme");
+  });
+}
+function setLightMode(...dom) {
+  dom.forEach(element => {
+      element.classList.remove("dark-theme", "browser");
+      element.classList.add("light-theme");
+  });
+}
+function setBrowserMode(dark,...dom) {
+  dom.forEach(element => {
+      element.classList.remove("dark-theme", "light-theme");
+      element.classList.add(  (dark?"dark":"light") + "-theme", "browser");
+  });
+}
 content.addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
   if (event.target && event.target.matches("button[id^='like-btn-']")) {
@@ -374,9 +391,12 @@ content.addEventListener("click", (event) => {
     return;
   }
 
-  if (btn.disabled === true) {
+  if (btn.disabled === true || nameField.value !="") {
     pendingPlacement = getPlacementFromClick(event);
     openMessageModal();
+    btn.click()
+    btn.innerText = "Your name";
+    btn.disabled = true;
   } else {
     alert(
       "Warning! Your post have no author. Please submit a name in the field and confirm.",

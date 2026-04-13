@@ -554,20 +554,7 @@ p.thought:after {
     opacity: 0;
   }
 }
-body.dark-theme{
-  top:0px;
-  position: absolute;
-  /*filter:brightness(0.8);*/
-  background-color: grey;
-}
 
-body.dark-theme header.composer-bar {
-  background: #000000;
-}
-
-body.dark-theme #content {
-  filter:brightness(0.8);
-}
 
 .weather-widget {
   position: fixed;
@@ -738,4 +725,19 @@ body.dark-theme #content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.dark-theme{
+  /* top:0px; */
+/*   position: absolute; */
+  /*filter:brightness(0.8);*/
+  background-color: grey;
+}
+
+.dark-theme header.composer-bar {
+  background: #000000;
+}
+
+.dark-theme #content {
+  filter:brightness(0.8);
 }
