@@ -463,7 +463,6 @@ onChildAdded(ref(db, "/messages"), (data) => {
         <div class="message-container">
     <p class="bubble animate-in${combinedClasses}" id="${data.key}" 
       style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
-
       ${quoteHTML}
       <span id="text-content-${messageId}">${msgContent}</span>
       <br/>
@@ -476,7 +475,7 @@ onChildAdded(ref(db, "/messages"), (data) => {
 
       <button id="delete-btn-${messageId}" class="emoji-btn subBtn">🗑️</button>
       <button id="edit-btn-${messageId}" class="emoji-btn subBtn">✏️</button>
-      <button id="reply-btn-${messageId}" class="emoji-btn subBtn">💬</button>
+      <button id="reply-btn-${messageId}" class="emoji-btn subBtn">🗨️</button>
     </p>
 
     <div class="replies" id="replies-${messageId}"></div>
@@ -520,14 +519,11 @@ onChildAdded(ref(db, "/messages"), (data) => {
         }
         const replyHTML = sanitizeHtml(`
           <div class="reply-bubble" id="reply-${replyId}" style="background-color:${replyData.color || d.color}; color:${replyTextColor}; --bubble-color:${replyData.color || d.color};">
-            
             ${replyQuoteHTML}
-
             <div id="reply-text-${replyId}">
               <strong>${replyData.author}</strong>: 
               ${replyData.message.replace(/@(\w+)/g, '<span class="mention">@$1</span>')}
             </div>
-
             <br/>
             <button id="reply-like-${replyId}" class="emoji-btn subBtn">👍</button>
             <span id="reply-like-count-${replyId}">${replyData.likes || 0}</span>
@@ -535,7 +531,7 @@ onChildAdded(ref(db, "/messages"), (data) => {
             <span id="reply-dislike-count-${replyId}">${replyData.dislikes || 0}</span>
             <button id="reply-delete-${replyId}" class="emoji-btn subBtn">🗑️</button>
             <button id="reply-edit-${replyId}" class="emoji-btn subBtn">✏️</button>
-            <button id="reply-reply-${replyId}" class="emoji-btn subBtn">💬</button>
+            <button id="reply-reply-${replyId}" class="emoji-btn subBtn">🗨️</button>
           </div>
         `);
         replyContainer.insertAdjacentHTML("beforeend", replyHTML);
