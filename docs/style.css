@@ -12,7 +12,8 @@
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-color: lightpink;
   font-family: "Segoe UI", sans-serif;
   color: var(--composer-text);
@@ -302,7 +303,7 @@ body {
 
 .bubble {
   min-width: 10rem;
-  position: absolute;
+  position: relative;
   padding: 14px 20px;
   background-color: var(--white);
   color: var(--grey);
@@ -313,6 +314,7 @@ body {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
   z-index: 1;
+  display: inline-block;
 }
 
 .bubble:hover {
@@ -470,7 +472,7 @@ p.thought:after {
 }
 
 .emoji-btn:hover {
-  transform: scale(1.2);
+  transform: scale(1.5);
 }
 .subBtn{
     font-size: 1rem;

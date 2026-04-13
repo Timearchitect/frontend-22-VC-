@@ -1,4 +1,4 @@
-import { editMessage } from './editMessages.js';
+import { editMessage } from "./editMessages.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
 import {
   getDatabase,
@@ -11,7 +11,7 @@ import {
   push,
   onChildAdded,
   onChildRemoved,
-  update
+  update,
 } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js"; // <---
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -33,7 +33,6 @@ const firebaseConfig = {
 
 const deleteSound = new Audio("./pop.mp3");
 
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app); // <-----
 const placementHint = document.getElementById("placement-hint");
@@ -48,8 +47,6 @@ const body = document.body;
 const introEffectMs = 420;
 const splashCleanupMs = 380;
 
-
-
 console.log(db);
 
 function hidePlacementHint() {
@@ -62,11 +59,11 @@ function sanitizeHtml(input) {
   const temp = document.createElement("div");
   temp.innerHTML = input;
 
-  temp.querySelectorAll("script").forEach(el => el.remove());
+  temp.querySelectorAll("script").forEach((el) => el.remove());
 
   // Ta bort farliga attribut + autoplay
-  temp.querySelectorAll("*").forEach(el => {
-    [...el.attributes].forEach(attr => {
+  temp.querySelectorAll("*").forEach((el) => {
+    [...el.attributes].forEach((attr) => {
       const name = attr.name.toLowerCase();
 
       if (name.startsWith("on") || name === "autoplay") {
@@ -81,6 +78,9 @@ function sanitizeHtml(input) {
 const nameField = document.getElementById("nameField");
 const textField = document.getElementById("textField");
 let pendingPlacement = null;
+let replyToMessageId = null;
+let replyToAuthor = null;
+let replyToText = null;
 
 // begränsar längd på texten (Elin)
 const max_text_length = 200;
@@ -89,7 +89,7 @@ textField.addEventListener("input", () => {
   if (textField.value.length > max_text_length) {
     textField.value = textField.value.substring(0, max_text_length);
   }
-// Uppdatera nedräkning
+  // Uppdatera nedräkning
   charCount.textContent = `${textField.value.length} / ${max_text_length}`;
 
   // Röd färg om texten är nära max
@@ -98,7 +98,6 @@ textField.addEventListener("input", () => {
   } else {
     charCount.style.color = "black";
   }
-
 });
 
 function openMessageModal() {
@@ -170,11 +169,10 @@ function submitMessageAtPendingPosition() {
   if (messageValue.length === 0) {
     highlightModalInput();
     return;
-    
   }
   const chosenColor = headerColorInput.value;
 
-  push(ref(db, "/"), {
+  push(ref(db, "/messages"), {
     username: "Alrik",
     dateOfCretion: new Date().toString("yyyy-MM-dd hh:mm:ss"),
     message: document.getElementById("uppercaseCheckbox").checked
@@ -187,6 +185,7 @@ function submitMessageAtPendingPosition() {
     coordinateSpace: "content-percent",
     x: pendingPlacement.x,
     y: pendingPlacement.y,
+    replyTo: replyToMessageId || null,
     attributes: {
       italic: document.getElementById("italicCheckbox").checked,
       uppercase: document.getElementById("uppercaseCheckbox").checked,
@@ -195,6 +194,40 @@ function submitMessageAtPendingPosition() {
   });
 
   closeMessageModal(true);
+}
+// Variation on submitMessageAtPendingPosition but for replies - Emma Persson
+function submitReply() {
+  const replyText = textField.value.trim();
+
+  if (replyText.length === 0) {
+    highlightModalInput();
+    return;
+  }
+
+  if (!replyToMessageId) return;
+
+  push(ref(db, `/messages/${replyToMessageId}/replies`), {
+    author: nameInput,
+    message: document.getElementById("uppercaseCheckbox").checked
+      ? replyText.toUpperCase()
+      : replyText,
+    replyTo: replyToAuthor,
+    replyPreview: replyToText,
+    color: headerColorInput.value,
+    likes: 0,
+    dislikes: 0,
+    attributes: {
+      italic: document.getElementById("italicCheckbox").checked,
+      uppercase: document.getElementById("uppercaseCheckbox").checked,
+      bold: document.getElementById("boldCheckbox").checked,
+    },
+  });
+
+  textField.value = "";
+  replyToMessageId = null;
+  replyToAuthor = null;
+  replyToText = null;
+  closeMessageModal(false);
 }
 //sparar author
 let nameInput = "";
@@ -225,15 +258,14 @@ nameField.addEventListener("keyup", (event) => {
   }
 });
 
-document.getElementById('delete-all-btn').addEventListener('click', () => {
-
-  if (!confirm("are you sure? ")) return // David Rhodin
+document.getElementById("delete-all-btn").addEventListener("click", () => {
+  if (!confirm("are you sure? ")) return; // David Rhodin
   remove(ref(db, "/"));
 });
 
 // Function to increment the like counter
 function likeMessage(messageId) {
-  const likesRef = ref(db, `/${messageId}/likes`);
+  const likesRef = ref(db, `/messages/${messageId}/likes`);
 
   // Use transaction to safely increment likes
   runTransaction(likesRef, (currentLikes) => {
@@ -245,7 +277,7 @@ function likeMessage(messageId) {
 
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
-  const dislikesRef = ref(db, `/${messageId}/dislikes`);
+  const dislikesRef = ref(db, `/messages/${messageId}/dislikes`);
 
   // Use transaction to safely increment dislikes
   runTransaction(dislikesRef, (currentDislikes) => {
@@ -256,21 +288,30 @@ function dislikeMessage(messageId) {
 }
 
 // Function to determine if text should be black or white based on background color
+
 function getTextColor(bgColor) {
+  if (!bgColor || typeof bgColor !== "string" || !bgColor.startsWith("#")) {
+    return "black";
+  }
+
   const r = parseInt(bgColor.substr(1, 2), 16);
   const g = parseInt(bgColor.substr(3, 2), 16);
   const b = parseInt(bgColor.substr(5, 2), 16);
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 150 ? 'black' : 'white';
+  return brightness > 150 ? "black" : "white";
 }
 
 modalSmileyBtn.addEventListener("click", () => {
-  textField.value += "😊";  // Add smiley emoji to the text field
+  textField.value += "😊"; // Add smiley emoji to the text field
   textField.focus();
 });
 
 modalSubmitBtn.addEventListener("click", () => {
-  submitMessageAtPendingPosition();
+  if (replyToMessageId) {
+    submitReply();
+  } else {
+    submitMessageAtPendingPosition();
+  }
 });
 
 modalCancelBtn.addEventListener("click", () => {
@@ -295,25 +336,29 @@ messageModal.addEventListener("click", (event) => {
 });
 
 // New Theme Switcher functionality
-document.getElementById('themeSelector').addEventListener('change', function(event) {
-  const selectedTheme = event.target.value;
-  switch (selectedTheme) {
-    case 'dark':
-    body.classList.remove('light-theme','browser');
-    body.classList.add('dark-theme');
-  break;
-     case 'browser':
-        body.classList.remove('dark-theme','light-theme');
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-          body.classList.add('dark-theme','browser');
-      else    
-          body.classList.add('light-theme','browser');
-   break;
-      case 'light':
-      body.classList.remove('dark-theme','browser');
-      body.classList.add('light-theme');
-  }
-});
+document
+  .getElementById("themeSelector")
+  .addEventListener("change", function (event) {
+    const selectedTheme = event.target.value;
+    switch (selectedTheme) {
+      case "dark":
+        body.classList.remove("light-theme", "browser");
+        body.classList.add("dark-theme");
+        break;
+      case "browser":
+        body.classList.remove("dark-theme", "light-theme");
+        if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        )
+          body.classList.add("dark-theme", "browser");
+        else body.classList.add("light-theme", "browser");
+        break;
+      case "light":
+        body.classList.remove("dark-theme", "browser");
+        body.classList.add("light-theme");
+    }
+  });
 
 content.addEventListener("click", (event) => {
   // Check if the click was on a Like or Dislike button, and handle it separately
@@ -334,7 +379,7 @@ content.addEventListener("click", (event) => {
     openMessageModal();
   } else {
     alert(
-      "Warning! Your post have no author. Please submit a name in the field and confirm."
+      "Warning! Your post have no author. Please submit a name in the field and confirm.",
     );
     nameField.style.backgroundColor = "red";
     setTimeout(() => {
@@ -368,7 +413,7 @@ function writeUserData() {
   },
   { onlyOnce: true }
 ); */
-onChildAdded(ref(db, "/"), (data) => {
+onChildAdded(ref(db, "/messages"), (data) => {
   hidePlacementHint();
 
   let d = data.val();
@@ -379,17 +424,32 @@ onChildAdded(ref(db, "/"), (data) => {
   const position = getNormalizedRenderPosition(d);
   // Skyddar användarinput (namn & meddelanden) genom escaping , originaldatan blir orörd i DB / mohammed
   // Fixar <script>-taggar etc. utan att förstöra legitima meddelanden, t.ex. "<3" blir "&#x3C;3"./ mohammed
-  const messageHTML = sanitizeHtml(`<strong>${d.author}:</strong> ${d.message}`);
+
+  // Added - Display quoted message if this is a reply - Emma Persson
+  let quoteHTML = "";
+  if (d.replyTo) {
+    quoteHTML = `
+    <div class="reply-quote">
+      <span class="reply-label">Replying to:</span>
+      <span class="reply-user">${d.replyTo}</span>
+      <div class="reply-preview">${d.replyText || ""}</div>
+    </div>
+  `;
+  }
+
+  const messageHTML = sanitizeHtml(
+    `<strong>${d.author}:</strong> ${d.message}`,
+  );
   const textColor = getTextColor(d.color); // Auto textfärg beroende på bakgrund
 
   // 💧 Steg 1: Lägg in meddelandet i vattenbubblan
- content.insertAdjacentHTML(
+  content.insertAdjacentHTML(
     "beforeend",
     `<div class="bubble-wrapper" id="wrap-${data.key}" style="left:${position.x}%; top:${position.y}%;">
       <div class="bubble-effect" id="effect-${data.key}">
         <div id="msg-${data.key}" style="color:${textColor};">${messageHTML}</div>
       </div>
-    </div>`
+    </div>`,
   );
 
   // 💥 Steg 2: Efter intro-animationen – ersätt med riktig bubbla och aktivera all funktionalitet
@@ -400,22 +460,179 @@ onChildAdded(ref(db, "/"), (data) => {
     if (wrapper && msgContent) {
       wrapper.innerHTML = `
         <div class="splash-explosion"></div>
-        <p class="bubble animate-in${combinedClasses}" id="${data.key}" style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
-          <span id="text-content-${messageId}">${msgContent}</span>
-          <br/>
-          <button id="like-btn-${messageId}" class="emoji-btn subBtn">👍</button>
-          <span id="like-count-${messageId}">${d.likes || 0}</span>
-          <button id="dislike-btn-${messageId}" class="emoji-btn subBtn">👎</button>
-          <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
-          <button id="delete-btn-${messageId}" class="emoji-btn subBtn">🗑️</button>
-          <button id="edit-btn-${messageId}" class="emoji-btn subBtn">✏️</button>
-        </p>
+        <div class="message-container">
+    <p class="bubble animate-in${combinedClasses}" id="${data.key}" 
+      style="background-color:${d.color}; color:${textColor}; --bubble-color:${d.color};">
+
+      ${quoteHTML}
+      <span id="text-content-${messageId}">${msgContent}</span>
+      <br/>
+
+      <button id="like-btn-${messageId}" class="emoji-btn subBtn">👍</button>
+      <span id="like-count-${messageId}">${d.likes || 0}</span>
+
+      <button id="dislike-btn-${messageId}" class="emoji-btn subBtn">👎</button>
+      <span id="dislike-count-${messageId}">${d.dislikes || 0}</span>
+
+      <button id="delete-btn-${messageId}" class="emoji-btn subBtn">🗑️</button>
+      <button id="edit-btn-${messageId}" class="emoji-btn subBtn">✏️</button>
+      <button id="reply-btn-${messageId}" class="emoji-btn subBtn">💬</button>
+    </p>
+
+    <div class="replies" id="replies-${messageId}"></div>
+  </div>
       `;
 
-      onValue(ref(db, `/${messageId}/message`), (snapshot) => {
+      // reply + quote + @mentions- Emma Persson
+      document
+        .getElementById(`reply-btn-${messageId}`)
+        .addEventListener("click", (event) => {
+          console.log("Reply button clicked for message ID:", messageId);
+          event.stopPropagation();
+
+          replyToMessageId = messageId;
+          replyToAuthor = d.author;
+          replyToText = d.message;
+
+          // Pre-filled text-input med @mention and quote
+          textField.value = "";
+          openMessageModal();
+        });
+
+      const replyRef = ref(db, `/messages/${messageId}/replies`);
+      onChildAdded(replyRef, (replySnap) => {
+        const replyData = replySnap.val();
+        const replyId = replySnap.key;
+        const replyTextColor = getTextColor(replyData.color || d.color);
+
+        const replyContainer = document.getElementById(`replies-${messageId}`);
+        if (!replyContainer) return;
+
+        let replyQuoteHTML = "";
+        if (replyData.replyTo) {
+          replyQuoteHTML = `
+            <div class="reply-quote">
+              <span class="reply-label">Replying to:</span>
+              <span class="reply-user">${replyData.replyTo}</span>
+              ${replyData.replyPreview ? `<div class="reply-preview">${replyData.replyPreview}</div>` : ""}
+            </div>
+          `;
+        }
+        const replyHTML = sanitizeHtml(`
+          <div class="reply-bubble" id="reply-${replyId}" style="background-color:${replyData.color || d.color}; color:${replyTextColor}; --bubble-color:${replyData.color || d.color};">
+            
+            ${replyQuoteHTML}
+
+            <div id="reply-text-${replyId}">
+              <strong>${replyData.author}</strong>: 
+              ${replyData.message.replace(/@(\w+)/g, '<span class="mention">@$1</span>')}
+            </div>
+
+            <br/>
+            <button id="reply-like-${replyId}" class="emoji-btn subBtn">👍</button>
+            <span id="reply-like-count-${replyId}">${replyData.likes || 0}</span>
+            <button id="reply-dislike-${replyId}" class="emoji-btn subBtn">👎</button>
+            <span id="reply-dislike-count-${replyId}">${replyData.dislikes || 0}</span>
+            <button id="reply-delete-${replyId}" class="emoji-btn subBtn">🗑️</button>
+            <button id="reply-edit-${replyId}" class="emoji-btn subBtn">✏️</button>
+            <button id="reply-reply-${replyId}" class="emoji-btn subBtn">💬</button>
+          </div>
+        `);
+        replyContainer.insertAdjacentHTML("beforeend", replyHTML);
+
+        onValue(
+          ref(db, `/messages/${messageId}/replies/${replyId}/message`),
+          (snap) => {
+            const replyTextEl = document.getElementById(
+              `reply-text-${replyId}`,
+            );
+            if (replyTextEl && snap.exists()) {
+              replyTextEl.innerHTML = `
+              <strong>${replyData.author}</strong>:
+              ${snap.val().replace(/@(\w+)/g, '<span class="mention">@$1</span>')}`;
+            }
+          },
+        );
+        // LIKE REPLY
+        document
+          .getElementById(`reply-like-${replyId}`)
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            runTransaction(
+              ref(db, `/messages/${messageId}/replies/${replyId}/likes`),
+              (val) => (val || 0) + 1,
+            );
+          });
+        onValue(
+          ref(db, `/messages/${messageId}/replies/${replyId}/likes`),
+          (snap) => {
+            document.getElementById(`reply-like-count-${replyId}`).textContent =
+              snap.val() || 0;
+          },
+        );
+        // DISLIKE REPLY
+        document
+          .getElementById(`reply-dislike-${replyId}`)
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            runTransaction(
+              ref(db, `/messages/${messageId}/replies/${replyId}/dislikes`),
+              (val) => (val || 0) + 1,
+            );
+          });
+        onValue(
+          ref(db, `/messages/${messageId}/replies/${replyId}/dislikes`),
+          (snap) => {
+            document.getElementById(
+              `reply-dislike-count-${replyId}`,
+            ).textContent = snap.val() || 0;
+          },
+        );
+        // DELETE REPLY
+        document
+          .getElementById(`reply-delete-${replyId}`)
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (confirm("Delete reply?")) {
+              remove(ref(db, `/messages/${messageId}/replies/${replyId}`));
+            }
+          });
+        onChildRemoved(ref(db, `/messages/${messageId}/replies`), (snap) => {
+          document.getElementById(`reply-${snap.key}`)?.remove();
+        });
+        // EDIT REPLY
+        document
+          .getElementById(`reply-edit-${replyId}`)
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            editMessage(
+              db,
+              `/messages/${messageId}/replies/${replyId}`,
+              replyData.message,
+            );
+          });
+        // REPLY TO REPLY
+        document
+          .getElementById(`reply-reply-${replyId}`)
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            replyToMessageId = messageId;
+            replyToAuthor = replyData.author;
+            replyToText = replyData.message;
+            textField.value = "";
+            openMessageModal();
+          });
+      });
+
+      // 🔄 Live-uppdatering av meddelandetext (inklusive @-mentions)
+      onValue(ref(db, `/messages/${messageId}/message`), (snapshot) => {
         const textSpan = document.querySelector(`#text-content-${messageId}`);
         if (textSpan && snapshot.exists()) {
           textSpan.innerHTML = snapshot.val();
+          textSpan.innerHTML = textSpan.innerHTML.replace(
+            /@(\w+)/g,
+            '<span class="mention">@$1</span>',
+          ); // Highlight @mentions (with CSS class "mention")
         }
       });
 
@@ -425,43 +642,52 @@ onChildAdded(ref(db, "/"), (data) => {
       }, splashCleanupMs);
 
       // 👍 Like-knapp
-      document.getElementById(`like-btn-${messageId}`)?.addEventListener("click", (event) => {
-        event.stopPropagation();
-        likeMessage(messageId);
-      });
+      document
+        .getElementById(`like-btn-${messageId}`)
+        ?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          likeMessage(messageId);
+        });
 
       // 👎 Dislike-knapp
-      document.getElementById(`dislike-btn-${messageId}`)?.addEventListener("click", (event) => {
-        event.stopPropagation();
-        dislikeMessage(messageId);
-      });
+      document
+        .getElementById(`dislike-btn-${messageId}`)
+        ?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          dislikeMessage(messageId);
+        });
 
       // 🗑️ Raderings-knapp
-     document.getElementById(`delete-btn-${messageId}`)?.addEventListener("click", (event) => {
-     event.stopPropagation();
-     if (confirm("Vill du radera detta meddelande?")) {
-    
-    // Spela ljudet om det finns
-    deleteSound.currentTime = 0; 
-    deleteSound.play().catch(err => console.log(err));
+      document
+        .getElementById(`delete-btn-${messageId}`)
+        ?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (confirm("Vill du radera detta meddelande?")) {
+            // Spela ljudet om det finns
+            deleteSound.currentTime = 0;
+            deleteSound.play().catch((err) => console.log(err));
 
-    // Ta bort från Firebase
-    remove(ref(db, `/${messageId}`));
-  }
-});
+            // Ta bort från Firebase
+            remove(ref(db, `/messages/${messageId}`));
+          }
+        });
       // ✏️ Edit-knapp
-      document.querySelector(`#edit-btn-${messageId}`)?.addEventListener("click", (event) => {
-        event.stopPropagation();
-        editMessage(db, messageId, d.message);
-      });
+      document
+        .querySelector(`#edit-btn-${messageId}`)
+        ?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          editMessage(db, messageId, d.message);
+        });
 
       // 🔄 Live-uppdatering
-      onValue(ref(db, `/${messageId}/likes`), (snapshot) => {
-        document.getElementById(`like-count-${messageId}`).textContent = snapshot.val() || 0;
+      onValue(ref(db, `/messages/${messageId}/likes`), (snapshot) => {
+        document.getElementById(`like-count-${messageId}`).textContent =
+          snapshot.val() || 0;
       });
 
-      onValue(ref(db, `/${messageId}/dislikes`), (snapshot) => {
-        document.getElementById(`dislike-count-${messageId}`).textContent = snapshot.val() || 0;
+      onValue(ref(db, `/messages/${messageId}/dislikes`), (snapshot) => {
+        document.getElementById(`dislike-count-${messageId}`).textContent =
+          snapshot.val() || 0;
       });
 
       // 🚫 Inaktivera högerklick
@@ -472,22 +698,20 @@ onChildAdded(ref(db, "/"), (data) => {
       bubble.addEventListener("mouseup", (event) => {
         if (event.button === 2) {
           if (confirm("Delete message?")) {
-
-            deleteSound.currentTime = 0; 
-            deleteSound.play().catch(err => console.log(err));
+            deleteSound.currentTime = 0;
+            deleteSound.play().catch((err) => console.log(err));
 
             bubble.remove();
             remove(ref(db, bubble.id));
           }
         }
       });
-
     }
   }, 699);
-}); 
+});
 
 // 🧹 Radera bubblan från DOM om den tas bort från Firebase
-onChildRemoved(ref(db, "/"), (data) => {
+onChildRemoved(ref(db, "/messages"), (data) => {
   document.querySelector(`#${data.key}`)?.remove();
   document.getElementById(data.key)?.remove();
 });
@@ -556,7 +780,7 @@ async function patchMessage2() {
 
   let response = await fetch(
     "https://demo1-3c759-default-rtdb.europe-west1.firebasedatabase.app/-NoCf2s5SInOIFR3X0VX/.json",
-    requestOptions
+    requestOptions,
   );
   let data = await response.json();
   console.log(data);
@@ -602,35 +826,31 @@ function checkFullscreen() {
     window.innerWidth == screen.width
   ) {
     // In fullscreen
-    setTimeout(()=>{
+    setTimeout(() => {
       document.body.classList.add("fullscreen");
       content.style.marginTop = "unset";
-    },1000)
-    
+    }, 1000);
   } else {
     // Not in fullscreen
-      content.style.marginTop = contentTopMargin;
-      document.body.classList.remove("fullscreen");
-
+    content.style.marginTop = contentTopMargin;
+    document.body.classList.remove("fullscreen");
   }
 }
 
 // Check fullscreen status every 10 seconds
 // setInterval(checkFullscreen, 10000);
 
-window.addEventListener('resize', checkFullscreen, true);
+window.addEventListener("resize", checkFullscreen, true);
 
-
-//---- Color theme ---- // 
+//---- Color theme ---- //
 
 function saveBackground(color) {
-  set(ref(db,'settings/background'),color);
+  set(ref(db, "settings/background"), color);
 }
 
-
-function loadBackground(){
-  get(ref(db,'settings/background')).then(snapshot =>{
-    if(snapshot.exists()){
+function loadBackground() {
+  get(ref(db, "settings/background")).then((snapshot) => {
+    if (snapshot.exists()) {
       const color = snapshot.val();
       document.body.style.background = snapshot.val();
       colorPicker.value = color;
@@ -638,10 +858,9 @@ function loadBackground(){
   });
 }
 
-//hej
-const colorPicker = document.querySelector('#colorPicker');
+const colorPicker = document.querySelector("#colorPicker");
 
-colorPicker.addEventListener('input',(e)=>{
+colorPicker.addEventListener("input", (e) => {
   const color = e.target.value;
   document.body.style.background = color;
   saveBackground(color);
@@ -700,27 +919,29 @@ setInterval(fetchTodaysWeatherMalmo, 10 * 60 * 1000);
  Automatisk rensning efter 5 minuter
  */
 function cleanupOldMessages() {
-  const secondsToLive = 600; 
+  const secondsToLive = 600;
   const expirationMs = secondsToLive * 1000;
   const now = Date.now();
 
-  get(ref(db, "/")).then((snapshot) => {
-    if (snapshot.exists()) {
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        const key = childSnapshot.key;
+  get(ref(db, "/messages"))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const data = childSnapshot.val();
+          const key = childSnapshot.key;
 
-        if (key === "settings") return;
+          if (key === "settings") return;
 
-        const createdAt = new Date(data.dateOfCretion).getTime();
+          const createdAt = new Date(data.dateOfCretion).getTime();
 
-        if (!isNaN(createdAt) && (now - createdAt) > expirationMs) {
-          console.log(`Rensar meddelande efter 10 minuter: ${key}`);
-          remove(ref(db, `/${key}`));
-        }
-      });
-    }
-  }).catch((err) => console.error("Rensningsfel:", err));
+          if (!isNaN(createdAt) && now - createdAt > expirationMs) {
+            console.log(`Rensar meddelande efter 10 minuter: ${key}`);
+            remove(ref(db, `/messages/${key}`));
+          }
+        });
+      }
+    })
+    .catch((err) => console.error("Rensningsfel:", err));
 }
 
 cleanupOldMessages();
