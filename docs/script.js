@@ -866,9 +866,54 @@ colorPicker.addEventListener("input", (e) => {
   saveBackground(color);
 });
 
-window.onload = () => {
-  loadBackground();
+
+// Todays Weather API call - Emma Persson
+const weatherApiKey = "eb78d4dd08f0c742513af068fe29e44c";
+const malmoLat = 55.6050;
+const malmoLon = 13.0038;
+const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${malmoLat}&lon=${malmoLon}&appid=${weatherApiKey}&units=metric&lang=sv`;
+
+async function fetchWeather() {
+  const weatherEl = document.getElementById('weather-widget');
+  if (!weatherEl) return;
+  try {
+    const response = await fetch(weatherApiUrl);
+    if (!response.ok) {
+      throw new Error("Network response is not ok");
+    }
+    const data = await response.json();
+    const temp = Math.round(data.main.temp);
+    const feelsLike = Math.round(data.main.feels_like);
+    const description = data.weather?.[0]?.description ?? "Okänt väder";
+    const icon = data.weather?.[0]?.icon ? `https://openweathermap.org/img/wn/${data.weather[0].icon}.png` : "";
+    const wind = Math.round(data.wind.speed ?? 0);
+
+   weatherEl.innerHTML = `
+    <div class="weather-widget-content">
+      ${icon ? `<img src="${icon}" alt="${description}" class="weather-icon">` : ""}
+
+      <div class="weather-text">
+        <div class="weather-widget__title">Dagens väder i Malmö</div>
+        <div>${description}</div>
+        <div>${temp}°C · Känns som ${feelsLike}°C</div>
+        <div class="weather-widget__meta">Vind: ${wind} m/s</div>
+      </div>
+    </div>
+  `;
+  } catch (error) {
+    console.error("Weather API error:", error);
+    weatherEl.textContent = "Väderdata kunde inte hämtas.";
+    return;
+  }
 };
+
+window.onload = ()=> {
+  loadBackground();
+  fetchWeather();
+};
+
+// Uppdatera vädret var 10:e minut
+setInterval(fetchTodaysWeatherMalmo, 10 * 60 * 1000);
 
 /**
  Automatisk rensning efter 5 minuter

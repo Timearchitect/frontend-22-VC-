@@ -1,7 +1,8 @@
 
-# detta är ett repo för versionshantering
+# Detta är ett repo för kursen versionshantering
 ## Fe22 , Fe23 , Fe24 & Fe25
 
+Link till kredits: [Credits på wikin](https://github.com/Timearchitect/frontend-22-VC-/wiki/Credits)
 # rubrik h1
 ## subrubrik h2
 ### subsubrubrik h3
