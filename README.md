@@ -57,10 +57,7 @@ fetch(url)
 .then ( (data) => console.log(data) ) 
 .catch ( error => console.error(error))
 ```
-
-<img width="200" src="images/logotyp-13.png"/>
-
-![alttext](/images/KDM%20mockup.png)
+<img width="200" src="https://github.com/Timearchitect/frontend-22-VC-/blob/main/docs/favicon-16x16.png">
 
 
 
