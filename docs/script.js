@@ -48,8 +48,6 @@ const body = document.body;
 //const introEffectMs = 420;
 const splashCleanupMs = 380;
 
-console.log(db);
-
 function hidePlacementHint() {
   if (placementHint) {
     placementHint.classList.add("is-hidden");
@@ -263,6 +261,27 @@ document.getElementById("delete-all-btn").addEventListener("click", () => {
   if (!confirm("are you sure? ")) return; // David Rhodin
   remove(ref(db, "/"));
 });
+
+function toggleWeatherVisibility(Boolean) {
+  const weatherEl = document.getElementById('weather-widget');
+  if (weatherEl) {
+    weatherEl.style.display = Boolean ? 'block' : 'none';
+  }
+}
+
+document.getElementById("toggle-weather-btn").addEventListener("click", () => {
+  // Mark Adelsberg
+  let isWeatherEnabled = false;
+  get(ref(db, "settings/weatherenabled")).then((snapshot) => {
+    if (snapshot.exists()) {
+      isWeatherEnabled = snapshot.val();
+      set(ref(db, "settings/weatherenabled"), !isWeatherEnabled);
+    }
+  });
+  set(ref(db, "settings/weatherenabled"), false);
+  toggleWeatherVisibility(isWeatherEnabled);
+});
+
 
 // Function to increment the like counter
 function likeMessage(messageId) {
@@ -889,9 +908,22 @@ const malmoLat = 55.6050;
 const malmoLon = 13.0038;
 const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${malmoLat}&lon=${malmoLon}&appid=${weatherApiKey}&units=metric&lang=sv`;
 
+async function weatherEnabled() {
+  let weatherEnabled = false;
+  await get(ref(db, "settings/weatherenabled")).then((snapshot) => {
+    if (snapshot.exists()) {
+      weatherEnabled = snapshot.val();
+    }
+  });
+  return weatherEnabled;
+}
+
 async function fetchWeather() {
   const weatherEl = document.getElementById('weather-widget');
-  if (!weatherEl) return;
+  weatherEl.style.display = "none";
+  const isWeatherEnabled = await weatherEnabled();
+
+  if (!weatherEl || !isWeatherEnabled) return;
   try {
     const response = await fetch(weatherApiUrl);
     if (!response.ok) {
@@ -904,6 +936,7 @@ async function fetchWeather() {
     const icon = data.weather?.[0]?.icon ? `https://openweathermap.org/img/wn/${data.weather[0].icon}.png` : "";
     const wind = Math.round(data.wind.speed ?? 0);
 
+    weatherEl.style.display = "block";
    weatherEl.innerHTML = `
     <div class="weather-widget-content">
       ${icon ? `<img src="${icon}" alt="${description}" class="weather-icon">` : ""}
@@ -929,7 +962,7 @@ window.onload = ()=> {
 };
 
 // Uppdatera vädret var 10:e minut
-setInterval(fetchTodaysWeatherMalmo, 10 * 60 * 1000);
+setInterval(fetchWeather, 10 * 60 * 1000);
 
 /**
  Automatisk rensning efter 5 minuter
