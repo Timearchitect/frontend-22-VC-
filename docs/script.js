@@ -282,10 +282,28 @@ document.getElementById("toggle-weather-btn").addEventListener("click", () => {
   toggleWeatherVisibility(isWeatherEnabled);
 });
 
+function getAuthor(messageId) {
+  const authorRef = ref(db, `/messages/${messageId}/author`);
+  return get(authorRef).then((snapshot) => {
+    return snapshot.exists() ? snapshot.val() : null;
+  });
+}
 
 // Function to increment the like counter
 function likeMessage(messageId) {
   const likesRef = ref(db, `/messages/${messageId}/likes`);
+
+  if (nameField.value === "") {
+    alert("Please enter your name before disliking a message.");
+    return;
+  }
+
+  getAuthor(messageId).then((author) => {
+    if (nameField.value === author) {
+      alert("You cannot like your own message.");
+      return;
+    }
+  });
 
   // Use transaction to safely increment likes
   runTransaction(likesRef, (currentLikes) => {
@@ -298,6 +316,18 @@ function likeMessage(messageId) {
 // Function to increment the dislike counter
 function dislikeMessage(messageId) {
   const dislikesRef = ref(db, `/messages/${messageId}/dislikes`);
+
+  if (nameField.value === "") {
+    alert("Please enter your name before disliking a message.");
+    return;
+  }
+
+  getAuthor(messageId).then((author) => {
+    if (nameField.value === author) {
+      alert("You cannot dislike your own message.");
+      return;
+    }
+  });
 
   // Use transaction to safely increment dislikes
   runTransaction(dislikesRef, (currentDislikes) => {
