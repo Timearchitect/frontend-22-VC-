@@ -302,7 +302,7 @@ function likeMessage(messageId) {
       return;
     } else {
       // Use transaction to safely increment dislikes
-      runTransaction(dislikesRef, (currentDislikes) => {
+      runTransaction(likesRef, (currentDislikes) => {
         return (currentDislikes || 0) + 1; // Increment dislikes by 1
       }).catch((error) => {
         console.log("Error updating dislikes:", error);
