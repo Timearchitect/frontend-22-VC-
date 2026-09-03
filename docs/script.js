@@ -264,9 +264,7 @@ document.getElementById("delete-all-btn").addEventListener("click", () => {
 
 function toggleWeatherVisibility(Boolean) {
   const weatherEl = document.getElementById('weather-widget');
-  if (weatherEl) {
-    weatherEl.style.display = Boolean ? 'block' : 'none';
-  }
+  weatherEl.style.display = Boolean ? 'block' : 'none';
 }
 
 document.getElementById("toggle-weather-btn").addEventListener("click", () => {
@@ -276,10 +274,10 @@ document.getElementById("toggle-weather-btn").addEventListener("click", () => {
     if (snapshot.exists()) {
       isWeatherEnabled = snapshot.val();
       set(ref(db, "settings/weatherenabled"), !isWeatherEnabled);
+      toggleWeatherVisibility(!isWeatherEnabled);
     }
   });
   set(ref(db, "settings/weatherenabled"), false);
-  toggleWeatherVisibility(isWeatherEnabled);
 });
 
 function getAuthor(messageId) {
@@ -302,14 +300,14 @@ function likeMessage(messageId) {
     if (nameField.value === author) {
       alert("You cannot like your own message.");
       return;
+    } else {
+      // Use transaction to safely increment dislikes
+      runTransaction(dislikesRef, (currentDislikes) => {
+        return (currentDislikes || 0) + 1; // Increment dislikes by 1
+      }).catch((error) => {
+        console.log("Error updating dislikes:", error);
+      });
     }
-  });
-
-  // Use transaction to safely increment likes
-  runTransaction(likesRef, (currentLikes) => {
-    return (currentLikes || 0) + 1; // Increment likes by 1
-  }).catch((error) => {
-    console.log("Error updating likes:", error);
   });
 }
 
@@ -326,14 +324,14 @@ function dislikeMessage(messageId) {
     if (nameField.value === author) {
       alert("You cannot dislike your own message.");
       return;
+    } else {
+      // Use transaction to safely increment dislikes
+      runTransaction(dislikesRef, (currentDislikes) => {
+        return (currentDislikes || 0) + 1; // Increment dislikes by 1
+      }).catch((error) => {
+        console.log("Error updating dislikes:", error);
+      });
     }
-  });
-
-  // Use transaction to safely increment dislikes
-  runTransaction(dislikesRef, (currentDislikes) => {
-    return (currentDislikes || 0) + 1; // Increment dislikes by 1
-  }).catch((error) => {
-    console.log("Error updating dislikes:", error);
   });
 }
 
